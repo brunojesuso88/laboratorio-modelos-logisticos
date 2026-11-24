@@ -51,7 +51,7 @@ section[data-view]{display:none}section[data-view].on{display:block}
 .btn{font-size:15px;padding:9px 14px;min-height:44px;border-radius:6px;border:1px solid var(--ink);background:var(--bg);color:var(--ink);cursor:pointer}
 .btn.pri{background:var(--ink);color:var(--bg)}
 .layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:28px;align-items:start}
-@media(max-width:900px){.layout{display:flex;flex-direction:column;align-items:stretch}.layout>.left{display:contents}.o1{order:1}.o2{order:2}.layout>aside{order:3}.o4{order:4}}
+@media(max-width:900px){.layout{display:flex;flex-direction:column;align-items:stretch}.layout>.left{display:contents}.o1{order:1}.o2{order:2}.layout>.side{order:3}.o4{order:4}}
 figure{margin:0}
 .fig{position:relative;min-height:420px;background:var(--bg)}
 .fig.sm{min-height:270px}
@@ -82,7 +82,7 @@ svg .bandr{fill:var(--band)}svg .bandr.hi{fill:light-dark(#11111122,#ffffff26)}
 .ptab tr.pr.hi td,.ptab tr.sl.hi td{background:var(--faint)}
 .ptab .sym{font-size:19px;font-style:italic;width:44px;white-space:nowrap}
 .ptab .unit{color:var(--mute);font-size:14px;white-space:nowrap;font-family:"IBM Plex Sans",Arial,sans-serif}
-.ptab input[type=number]{width:96px;font:16px "IBM Plex Sans",Arial,sans-serif;padding:7px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);text-align:right}
+.ptab input[type=text]{width:96px;font:16px "IBM Plex Sans",Arial,sans-serif;padding:7px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);text-align:right}
 .ptab input[type=range]{width:100%;height:32px;accent-color:var(--ink)}
 .ptab tr.locked input{opacity:.55}
 @media(max-width:600px){.ptab{font-size:15px}.ptab .unit{white-space:normal;font-size:13px}.ptab input[type=number]{width:78px}.ptab .sym{width:34px;font-size:17px}.ptab th,.ptab td{padding-left:3px;padding-right:3px}}
@@ -131,7 +131,7 @@ textarea{width:100%;min-height:200px;font:15px/1.5 "IBM Plex Sans",Arial,sans-se
 footer{border-top:1px solid var(--line);padding:10px max(5vw,16px);color:var(--mute);font:13px "IBM Plex Sans",Arial,sans-serif}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media(max-width:600px){.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0!important;padding:3px 0;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;font:600 13px "IBM Plex Sans",Arial,sans-serif;color:var(--mute)}.stack td:empty{display:none}}
-@media(prefers-reduced-motion:no-preference){svg .an,svg .anl,svg .bandr{transition:all .15s}}
+@media(prefers-reduced-motion:no-preference){svg .an,svg .anl,svg .bandr{transition:stroke .15s,fill .15s,stroke-width .15s}}
 /* ---------- modo tutorial ---------- */
 .tm-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:18px 0 10px}
 @media(max-width:900px){.tm-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.tm-grid{grid-template-columns:minmax(0,1fr)}}
@@ -179,21 +179,53 @@ ol.td-stm{margin:6px 0;padding-left:22px}ol.td-stm li{margin:0 0 10px}ol.td-stm 
 .tut-locked{opacity:.3;filter:grayscale(1)}
 body.tut-noparams #sim-ctl,body.tut-noparams #sim-kv,body.tut-noparams .eqbox,body.tut-noparams #sim-cap,body.tut-noparams #sim-explain,body.tut-noparams #sim-limit,body.tut-noparams #sim-table{visibility:hidden}
 
+
+/* ---------- v2.2: interface enxuta ---------- */
+header{padding:0 max(5vw,16px)}
+.hbar{display:flex;align-items:center;gap:6px 28px;flex-wrap:wrap}
+h1.brand{font-size:20px;margin:0;padding:12px 0;letter-spacing:0}
+nav{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}nav a{white-space:nowrap}
+main{padding-top:18px}
+.kicker{margin-top:4px}.lede{margin-bottom:10px}
+.figbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 0}
+.figbar label{display:inline-flex;gap:6px;align-items:center;min-height:36px;margin-right:6px;font-size:15px}
+.linkbox{font:13px "IBM Plex Sans",Arial,sans-serif;width:min(420px,70vw);padding:4px 6px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink)}
+details.more{margin:14px 0;border-top:1px solid var(--line);padding-top:6px}
+details.more>summary{font:500 15px "IBM Plex Sans",Arial,sans-serif;color:var(--ink);padding:6px 0}
+details.more[open]>summary{margin-bottom:8px}
+#sim-more .dtab{margin-top:10px}
+.ptab td{padding:7px 4px;vertical-align:middle;border-bottom:1px solid var(--line)}
+.ptab .sym{width:30px}
+.ptab .ctlc label{display:block;font:13.5px/1.3 "IBM Plex Sans",Arial,sans-serif;color:var(--mute)}
+.ptab .ctlc input[type=range]{height:26px;margin:2px 0 0}
+.ptab .valc{width:92px;text-align:right}
+.ptab .valc input{width:84px}
+.ptab .unit{width:84px;font-size:13px;white-space:normal}
+.ptab tr.locked input[type=range]{display:none}
+.ptab caption{margin-bottom:4px}
+#c3-adv .toolbar{margin:6px 0 10px}#c3-adv .btn{margin-top:8px}
+.tm-card.off{opacity:1;border-top-color:var(--line);background:var(--paper)}
+.tm-card.off h3,.tm-card.off p{color:var(--mute)}
+@media(max-width:600px){
+  .seg{flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:thin}.seg button{flex:none}
+  .toolbar{gap:8px}.toolbar>span{max-width:100%;display:flex;flex-direction:column;gap:2px}
+  .fig{min-height:320px}
+  #tut-dock{max-height:42vh}
+  .ptab .unit{width:64px}
+}
 </style>
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
 </head>
 <body>
 <header>
-  <p class="kicker">Projeto-Matriz · Etapa 5 · Protótipo 2.0 · Formação interdisciplinar de professores</p>
-  <h1>Laboratório Interdisciplinar de Modelos Logísticos</h1>
-  <p class="lede">Uma mesma curva, diferentes fenômenos: Verhulst, Teoria de Resposta ao Item e Fermi–Dirac</p>
-  <nav aria-label="Módulos"><a href="#aprender">Aprender</a><a href="#simular">Simular</a><a href="#comparar">Comparar</a><a href="#planejar">Planejar</a></nav>
+  <div class="hbar"><h1 class="brand">Laboratório de Modelos Logísticos</h1>
+  <nav aria-label="Módulos"><a href="#aprender">Aprender</a><a href="#simular">Simular</a><a href="#comparar">Comparar</a><a href="#planejar">Planejar</a></nav></div>
 </header>
 <main>
 
 <!-- ============================== SIMULAR ============================== -->
 <section data-view="simular" aria-labelledby="h-sim">
-  <h2 id="h-sim">Simular</h2>
+  <h2 id="h-sim" class="sr">Simular</h2>
   <div class="toolbar ui">
     <span><span class="lab">Modelo</span> <span class="seg" role="group" aria-label="Modelo" id="sim-model"></span></span>
     <span><span class="lab">Representação</span> <span class="seg" role="group" aria-label="Representação" id="sim-rep"></span></span>
@@ -205,33 +237,34 @@ body.tut-noparams #sim-ctl,body.tut-noparams #sim-kv,body.tut-noparams .eqbox,bo
         <div class="key" id="sim-legend"></div>
         <figcaption id="sim-cap"></figcaption>
       </figure>
-      <div class="opts-row ui o1">
-        <label><input type="checkbox" id="sim-ann"> Mostrar a geometria dos parâmetros</label>
-        <span class="small mute">Passe o cursor sobre um parâmetro da Tabela 1 para destacá-lo na figura. Use as setas ← → sobre a figura para mover o cursor.</span>
+      <div class="figbar ui o1">
+        <label title="Com a geometria ligada, passe o cursor sobre um parâmetro da Tabela 1 para destacá-lo na figura"><input type="checkbox" id="sim-ann"> Geometria dos parâmetros</label>
+        <button class="btn sm" id="sim-pin" type="button">Fixar referência</button>
+        <button class="btn sm" id="sim-unpin" type="button">Limpar referência</button>
+        <button class="btn sm" id="sim-reset" type="button">Valores iniciais</button>
+        <button class="btn sm" id="sim-link" type="button">Copiar link</button>
+        <span class="small mute" id="sim-linkmsg" aria-live="polite"></span>
       </div>
-      <div class="eqbox o2"><div class="eqn" id="sim-eq" aria-live="polite"></div><span class="no">(1)</span></div>
-      <div class="eqbox o2"><div class="eqn" id="sim-eqn"></div><span class="no">(2)</span></div>
+      <div class="eqbox o2"><div class="eqn" id="sim-eq" role="img"></div><span class="no">(1)</span></div>
       <div class="note o2" id="sim-explain" aria-live="polite"></div>
-      <div class="note o4" id="sim-limit"></div>
-      <details class="o4"><summary>Tabela de valores (alternativa textual à figura)</summary><div class="scroll" id="sim-table"></div></details>
+      <details class="more o4" id="sim-more"><summary>Mais detalhes: equação com valores, grandezas derivadas, limite do modelo e tabela de valores</summary>
+        <div class="eqbox"><div class="eqn" id="sim-eqn" role="img"></div><span class="no">(2)</span></div>
+        <table class="dtab" id="sim-kv"></table>
+        <div class="note" id="sim-limit"></div>
+        <p class="small mute" style="margin:14px 0 4px">Tabela de valores (alternativa textual à figura)</p><div class="scroll" id="sim-table"></div>
+      </details>
     </div>
-    <aside>
+    <div class="side">
       <div id="sim-vmode"></div>
       <div id="sim-ctl"></div>
       <div class="alert" id="sim-alert" role="alert"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px" class="ui">
-        <button class="btn" id="sim-pin" type="button">Fixar curva de referência</button>
-        <button class="btn" id="sim-unpin" type="button">Limpar referência</button>
-        <button class="btn" id="sim-reset" type="button">Valores iniciais</button>
-      </div>
-      <table class="dtab" id="sim-kv"></table>
-    </aside>
+    </div>
   </div>
 </section>
 
 <!-- ============================== COMPARAR ============================== -->
 <section data-view="comparar" aria-labelledby="h-cmp">
-  <h2 id="h-cmp">Comparar</h2>
+  <h2 id="h-cmp" class="sr">Comparar</h2>
   <div class="toolbar ui"><span class="seg" role="group" aria-label="Modo de comparação" id="cmp-mode"></span></div>
 
   <div id="cmp-1">
@@ -250,18 +283,16 @@ body.tut-noparams #sim-ctl,body.tut-noparams #sim-kv,body.tut-noparams .eqbox,bo
         <div class="key" id="c2-legend"></div>
         <figcaption><b>Figura 3.</b> Os três modelos no argumento adimensional <i>z</i>. Após normalizar a grandeza vertical (<i>n</i> = <i>N</i>/<i>K</i>, <i>P</i>, <i>f</i>) e substituir a variável horizontal por <i>z</i>, os pontos calculados por cada modelo — com seus próprios parâmetros — caem sobre a mesma curva <i>L</i>(<i>z</i>) = 1/(1 + e<sup>−<i>z</i></sup>). A tangente em <i>z</i> = 0 tem inclinação 1/4.</figcaption></figure>
       </div>
-      <aside>
+      <div class="side">
         <table class="dtab" id="c2-z" style="margin-top:0"></table>
         <p class="note"><span class="h">Leitura crítica</span>A coincidência é uma igualdade matemática construída por normalização e mudança de variável. Ela não mostra que população, proficiência e ocupação quântica sejam a mesma grandeza.</p>
-      </aside>
+      </div>
     </div>
   </div>
 
   <div id="cmp-3">
     <div class="toolbar ui">
-      <span><span class="lab">Modelo da TRI</span> <span class="seg" role="group" aria-label="Modelo da TRI" id="c3-model"></span></span>
       <span><span class="lab">Correspondência</span> <span class="seg" role="group" aria-label="Correspondência" id="c3-mode"></span></span>
-      <span><span class="lab">Editar por</span> <span class="seg" role="group" aria-label="Editar por" id="c3-edit"></span></span>
     </div>
     <div class="layout">
       <div class="left">
@@ -272,20 +303,25 @@ body.tut-noparams #sim-ctl,body.tut-noparams #sim-kv,body.tut-noparams .eqbox,bo
           </div>
           <figcaption id="c3-cap"></figcaption>
         </figure>
-        <div class="eqbox o2"><div class="eqn" id="c3-eq"></div><span class="no">(3)</span></div>
+        <div class="eqbox o2"><div class="eqn" id="c3-eq" role="img"></div><span class="no">(3)</span></div>
         <div class="alert o2" id="c3-alert" role="alert"></div>
         <div class="note o4" id="c3-explain" aria-live="polite"></div>
       </div>
-      <aside>
+      <div class="side">
         <div id="c3-ctl"></div>
-        <div class="ui" style="margin-top:10px"><button class="btn" type="button" id="c3-l300">λ = k<sub>B</sub> · 300 K</button></div>
         <table class="dtab" id="c3-kv"></table>
-      </aside>
+        <details class="more ui" id="c3-adv"><summary>Opções avançadas: modelo da TRI, sentido da edição e escala da transformação</summary>
+          <div class="toolbar"><span><span class="lab">Modelo da TRI</span> <span class="seg" role="group" aria-label="Modelo da TRI" id="c3-model"></span></span>
+          <span><span class="lab">Editar por</span> <span class="seg" role="group" aria-label="Editar por" id="c3-edit"></span></span></div>
+          <div id="c3-ctl2"></div>
+          <button class="btn sm" type="button" id="c3-l300">λ = k<sub>B</sub> · 300 K</button>
+        </details>
+      </div>
     </div>
   </div>
 
-  <div class="scroll" style="margin-top:34px"><table class="art stack">
-    <caption><b>Tabela 3.</b> Correspondência formal não é identidade científica.</caption>
+  <details class="more" id="cmp-limits" style="margin-top:28px"><summary><b>Tabela 3.</b> Correspondência formal não é identidade científica — o que a analogia não autoriza</summary>
+  <div class="scroll"><table class="art stack">
     <thead><tr><th>Aspecto</th><th>Verhulst</th><th>TRI</th><th>Fermi–Dirac</th></tr></thead>
     <tbody>
       <tr><td>Objeto representado</td><td>População</td><td>Resposta a um item</td><td>Ocupação de um estado quântico</td></tr>
@@ -295,11 +331,13 @@ body.tut-noparams #sim-ctl,body.tut-noparams #sim-kv,body.tut-noparams .eqbox,bo
       <tr><td>Origem da forma logística</td><td>Solução de uma equação diferencial fenomenológica</td><td>Escolha de modelagem psicométrica</td><td>Ensemble grande-canônico de um estado binário</td></tr>
       <tr><td>O que não se transfere</td><td>Tempo não é proficiência</td><td>A “temperatura” associada a <i>a</i> não é temperatura física</td><td>Não há “vagas” de aprendizagem nem dinâmica temporal</td></tr>
     </tbody>
-  </table></div>
+  </table></div></details>
 </section>
 
 <!-- ============================== APRENDER ============================== -->
 <section data-view="aprender" aria-labelledby="h-apr">
+  <p class="kicker">Projeto-Matriz · Etapa 5 · Formação interdisciplinar de professores</p>
+  <p class="lede">Uma mesma curva, diferentes fenômenos: Verhulst, Teoria de Resposta ao Item e Fermi–Dirac</p>
   <h2 id="h-apr">Aprender — modo tutorial</h2>
   <p class="paper">Seis fases curtas ensinam a extrair as <b>seis leituras</b> de uma curva logística — teto e piso, centro, inclinação central, largura da transição, forma linearizada e limite da analogia. O tutor dá uma instrução por vez, você age no simulador real, e cada descoberta vai para o caderno de campo.</p>
   <div class="tm-grid" id="tut-map"></div>
@@ -325,7 +363,7 @@ body.tut-noparams #sim-ctl,body.tut-noparams #sim-kv,body.tut-noparams .eqbox,bo
   <div class="toolbar ui"><span class="seg" role="group" aria-label="Roteiro" id="pln-pick"></span></div>
   <div class="layout">
     <article class="card" id="pln-card"></article>
-    <aside class="card">
+    <div class="side card">
       <h3>Sua adaptação</h3>
       <label for="pln-text" class="small mute">Texto editável do roteiro</label>
       <textarea id="pln-text"></textarea>
@@ -334,7 +372,7 @@ body.tut-noparams #sim-ctl,body.tut-noparams #sim-kv,body.tut-noparams .eqbox,bo
         <button class="btn" type="button" id="pln-restore">Restaurar modelo</button>
       </div>
       <p class="small mute" id="pln-status" aria-live="polite"></p>
-    </aside>
+    </div>
   </div>
 </section>
 </main>
@@ -345,7 +383,7 @@ body.tut-noparams #sim-ctl,body.tut-noparams #sim-kv,body.tut-noparams .eqbox,bo
   <div class="td-body"><div class="td-av" aria-hidden="true">PG</div><div class="td-main"><p class="td-who">Prof. Gelado</p><div id="td-msg" aria-live="polite"></div><div id="td-act"></div></div></div>
 </div>
 <aside id="tut-drawer" class="ui" aria-label="Caderno de campo" hidden><div class="td-head"><b>Caderno de campo</b><button class="btn sm tn-close" type="button">Fechar</button></div><div class="tn-list"></div></aside>
-<footer>Versão 2.1 · Prof. Gelado · Nenhum dado pessoal é coletado<span id="ver" hidden></span></footer>
+<footer>Versão 2.2 · Prof. Gelado · Nenhum dado pessoal é coletado<span id="ver" hidden></span></footer>
 
 <script>
 /*
@@ -781,7 +819,9 @@ function setCursor(id, x, quiet) {
   ro.innerHTML = `<b>${spec.xs} = ${fmt(x, 4)}${spec.xu ? ' ' + spec.xu : ''}</b>${spec.extra ? '<br>' + spec.extra(x) : ''}<br>` + lines.join('<br>');
   ro.style.display = 'block';
   const left = px > (m.L + m.W - m.R) / 2;
-  ro.style.left = (left ? Math.max(m.L + 6, px - ro.offsetWidth - 12) : Math.min(px + 12, m.W - m.R - ro.offsetWidth - 6)) + 'px'; ro.style.top = (m.H - m.B - ro.offsetHeight - 10) + 'px';
+  const fy = spec.series.map(se => se.f(x)).find(y => Number.isFinite(y)), mid = (m.T + m.H - m.B) / 2;
+  const low = fy == null || m.Y(fy) < mid; // curva na metade de cima → quadro embaixo, e vice-versa
+  ro.style.left = (left ? Math.max(m.L + 6, px - ro.offsetWidth - 12) : Math.min(px + 12, m.W - m.R - ro.offsetWidth - 6)) + 'px'; ro.style.top = (low ? m.H - m.B - ro.offsetHeight - 10 : m.T + 10) + 'px';
   if (!quiet) emit('cursor', { id, x });
   if (!quiet && spec.link) setCursor(spec.link.id, spec.link.map(x), true);
 }
@@ -824,13 +864,22 @@ const PARAMS = {
   E0: { l: 'Referência de energia', s: 'E<sub>0</sub>', u: 'eV', min: 0, max: 1, step: 0.005 },
   lambda: { l: 'Escala de conversão', s: 'λ', u: 'eV/(un. de θ)', min: 0.005, max: 0.2, step: 0.0005 },
 };
+// números exibidos e digitados no padrão brasileiro: vírgula decimal ("0,5"); ponto também é aceito
+const fmtIn = v => String(+(+v).toPrecision(6)).replace('.', ',');
+const parseNum = s => { s = String(s).trim().replace(/\s/g, ''); if (s === '') return NaN; if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.'); return +s; };
 function ptable(caption, rows, pre) {
-  return `<table class="ptab"><caption>${caption}</caption><thead><tr><th>Símb.</th><th>Grandeza</th><th style="text-align:right">Valor</th><th>Unidade</th></tr></thead><tbody>${rows.map(r => {
+  return `<table class="ptab"><caption>${caption}</caption><thead class="sr"><tr><th>Símbolo</th><th>Grandeza e controle deslizante</th><th>Valor</th><th>Unidade</th></tr></thead><tbody>${rows.map(r => {
     const p = PARAMS[r.k], id = `${pre}-${r.k}`, min = r.min ?? p.min, max = r.max ?? p.max, attr = r.s ? `data-s="${r.k}"` : `data-k="${r.k}"`;
     const val = +(+r.v).toPrecision(6);
-    return `<tr class="pr${r.locked ? ' locked' : ''}" data-p="${r.k}"><td class="sym">${p.s}</td><td><label for="${id}">${p.l}</label>${r.locked ? '<span class="lock">vinculado</span>' : ''}</td><td style="text-align:right"><input type="number" ${attr} data-num="1" aria-label="${p.l} em ${p.u}" min="${min}" max="${max}" step="${p.step}" value="${val}" ${r.locked ? 'disabled' : ''}></td><td class="unit">${p.u}</td></tr>
-    <tr class="sl${r.locked ? ' locked' : ''}" data-p="${r.k}"><td></td><td colspan="3"><input type="range" id="${id}" ${attr} min="${min}" max="${max}" step="${p.step}" value="${val}" ${r.locked ? 'disabled' : ''} aria-label="${p.l}"></td></tr>`;
+    return `<tr class="pr${r.locked ? ' locked' : ''}" data-p="${r.k}"><td class="sym">${p.s}</td><td class="ctlc"><label for="${id}-n">${p.l}${r.locked ? ' <span class="lock">vinculado</span>' : ''}</label><input type="range" id="${id}" ${attr} min="${min}" max="${max}" step="${p.step}" value="${val}" ${r.locked ? 'disabled' : ''} aria-label="${p.l} (controle deslizante)"></td><td class="valc"><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="${id}-n" ${attr} data-num="1" data-min="${min}" data-max="${max}" value="${fmtIn(val)}" ${r.locked ? 'disabled' : ''}></td><td class="unit">${p.u}</td></tr>`;
   }).join('')}</tbody></table>`;
+}
+// campo de texto numérico: aplica ao confirmar (Enter, sair do campo) ou após uma pausa na digitação
+function numField(box, commit) {
+  const fire = el => { clearTimeout(el._t); commit(el, parseNum(el.value)); };
+  box.addEventListener('input', e => { const el = e.target; if (!el.dataset.num) return; clearTimeout(el._t); el._t = setTimeout(() => fire(el), 900); });
+  box.addEventListener('change', e => { if (e.target.dataset.num) fire(e.target); });
+  box.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.dataset.num) { e.preventDefault(); fire(e.target); } });
 }
 function bindHilite(box, figs) {
   box._figs = figs;
@@ -926,11 +975,11 @@ function annotations(m, P, rep) {
 // ------------------------------------------------------------ SIMULAR
 function equations(m, P) {
   const T = fmtT;
-  if (m === 'ver') return [[`N(t)=\\dfrac{K}{1+e^{-r\\,(t-t_0)}},\\qquad \\dfrac{dN}{dt}=rN\\left(1-\\dfrac{N}{K}\\right)`, `${V('N')}(${V('t')}) = ${V('K')}/[1 + e<sup>−${V('r')}(${V('t')} − ${V('t')}<sub>0</sub>)</sup>]`], [`N(t)=\\dfrac{${T(P.K, 0)}}{1+e^{-${T(P.r)}\\,(t-${T(P.t0, 3)})}}`, `${V('N')}(${V('t')}) = ${fmt(P.K, 0)}/[1 + e<sup>−${fmt(P.r)}(${V('t')} − ${fmt(P.t0, 3)})</sup>]`]];
+  if (m === 'ver') return [[`N(t)=\\dfrac{K}{1+e^{-r\\,(t-t_0)}}`, `${V('N')}(${V('t')}) = ${V('K')}/[1 + e<sup>−${V('r')}(${V('t')} − ${V('t')}<sub>0</sub>)</sup>]`], [`N(t)=\\dfrac{${T(P.K, 0)}}{1+e^{-${T(P.r)}\\,(t-${T(P.t0, 3)})}}`, `${V('N')}(${V('t')}) = ${fmt(P.K, 0)}/[1 + e<sup>−${fmt(P.r)}(${V('t')} − ${fmt(P.t0, 3)})</sup>]`]];
   if (m === 'fd') return [[`f(E)=\\dfrac{1}{1+e^{(E-\\mu)/k_BT}}`, `${V('f')}(${V('E')}) = 1/[1 + e<sup>(${V('E')} − ${V('μ')})/(${V('k')}<sub>B</sub>${V('T')})</sup>]`], [`f(E)=\\dfrac{1}{1+e^{(E-${T(P.mu)}\\,\\mathrm{eV})/(${T(C.KB_EV * P.T * 1000, 3)}\\,\\mathrm{meV})}}`, `${V('f')}(${V('E')}) = 1/[1 + e<sup>(${V('E')} − ${fmt(P.mu)} eV)/(${fmt(C.KB_EV * P.T * 1000, 3)} meV)</sup>]`]];
   if (m === 'rasch') return [[`P(\\theta)=\\dfrac{1}{1+e^{-(\\theta-b)}}`, `${V('P')}(${V('θ')}) = 1/[1 + e<sup>−(${V('θ')} − ${V('b')})</sup>]`], [`P(\\theta)=\\dfrac{1}{1+e^{-(\\theta-${T(P.b)})}}`, `${V('P')}(${V('θ')}) = 1/[1 + e<sup>−(${V('θ')} − ${fmt(P.b)})</sup>]`]];
   if (m === 'i2') return [[`P(\\theta)=\\dfrac{1}{1+e^{-a(\\theta-b)}}`, `${V('P')}(${V('θ')}) = 1/[1 + e<sup>−${V('a')}(${V('θ')} − ${V('b')})</sup>]`], [`P(\\theta)=\\dfrac{1}{1+e^{-${T(P.a)}\\,(\\theta-${T(P.b)})}}`, `${V('P')}(${V('θ')}) = 1/[1 + e<sup>−${fmt(P.a)}(${V('θ')} − ${fmt(P.b)})</sup>]`]];
-  return [[`P(\\theta)=c+\\dfrac{1-c}{1+e^{-a(\\theta-b)}},\\qquad q=\\dfrac{P-c}{1-c}`, `${V('P')}(${V('θ')}) = ${V('c')} + (1 − ${V('c')})/[1 + e<sup>−${V('a')}(${V('θ')} − ${V('b')})</sup>]`], [`P(\\theta)=${T(P.c)}+\\dfrac{${T(1 - P.c)}}{1+e^{-${T(P.a)}\\,(\\theta-${T(P.b)})}}`, `${V('P')}(${V('θ')}) = ${fmt(P.c)} + ${fmt(1 - P.c)}/[1 + e<sup>−${fmt(P.a)}(${V('θ')} − ${fmt(P.b)})</sup>]`]];
+  return [[`P(\\theta)=c+\\dfrac{1-c}{1+e^{-a(\\theta-b)}}`, `${V('P')}(${V('θ')}) = ${V('c')} + (1 − ${V('c')})/[1 + e<sup>−${V('a')}(${V('θ')} − ${V('b')})</sup>]`], [`P(\\theta)=${T(P.c)}+\\dfrac{${T(1 - P.c)}}{1+e^{-${T(P.a)}\\,(\\theta-${T(P.b)})}}`, `${V('P')}(${V('θ')}) = ${fmt(P.c)} + ${fmt(1 - P.c)}/[1 + e<sup>−${fmt(P.a)}(${V('θ')} − ${fmt(P.b)})</sup>]`]];
 }
 function derived(m, P) { // [grandeza, expressão, valor]
   if (m === 'ver') return [['Instante central', S.vmode === 'curva' ? V('t') + '<sub>0</sub>' : 'ln[(K − N₀)/N₀]/' + V('r'), fmt(P.t0, 3) + ' dias'], ['População no centro', V('K') + '/2', fmt(P.K / 2, 1)], ['Inclinação máxima', V('rK') + '/4', fmt(P.r * P.K / 4, 2) + ' ind./dia'], ['Largura 10 %–90 %', '4,39/' + V('r'), fmt(W1090 / P.r, 2) + ' dias'], ['População em <i>t</i> = 0', V('N') + '(0)', fmt(C.verhulst.N(0, P), 2)]];
@@ -972,7 +1021,7 @@ const REPNAME = { orig: 'representação original', norm: 'representação norma
 function caption(m, P, spec) {
   const par = m === 'ver' ? `<i>K</i> = ${fmt(P.K, 0)} indivíduos, <i>r</i> = ${fmt(P.r)} dia<sup>−1</sup>, <i>t</i><sub>0</sub> = ${fmt(P.t0, 2)} dias` : m === 'fd' ? `<i>μ</i> = ${fmt(P.mu)} eV, <i>T</i> = ${fmt(P.T, 0)} K (<i>k</i><sub>B</sub><i>T</i> = ${fmt(C.KB_EV * P.T * 1000, 2)} meV)` : m === 'rasch' ? `<i>b</i> = ${fmt(P.b)}` : m === 'i2' ? `<i>a</i> = ${fmt(P.a)}, <i>b</i> = ${fmt(P.b)}` : `<i>a</i> = ${fmt(P.a)}, <i>b</i> = ${fmt(P.b)}, <i>c</i> = ${fmt(P.c)}`;
   const what = { ver: 'Solução logística de Verhulst', rasch: 'Curva característica do item no modelo de Rasch', i2: 'Curva característica do item na TRI de dois parâmetros', i3: 'Curva característica do item na TRI de três parâmetros', fd: 'Distribuição de Fermi–Dirac' }[m];
-  const geo = (S.rep === 'orig' || S.rep === 'norm') ? ' Linhas finas: geometria dos parâmetros — ponto central, tangente no ponto de inflexão e faixa sombreada da transição de 10 % a 90 %.' : S.rep === 'logit' ? ' Na forma logit a curva torna-se uma reta; o gráfico é restrito a |<i>z</i>| ≤ 15 por precisão numérica.' : ' O máximo do módulo da derivada ocorre no ponto de inflexão.';
+  const geo = (S.rep === 'orig' || S.rep === 'norm') ? (S.ann && !S.mystery ? ' Linhas finas: geometria dos parâmetros — ponto central, tangente no ponto de inflexão e faixa sombreada da transição de 10 % a 90 %.' : '') : S.rep === 'logit' ? ' Na forma logit a curva torna-se uma reta; o gráfico é restrito a |<i>z</i>| ≤ 15 por precisão numérica.' : ' O máximo do módulo da derivada ocorre no ponto de inflexão.';
   return `<b>Figura 1.</b> ${what}, ${REPNAME[S.rep]}, para ${par}.${geo}${S.ref && S.ref.m === m ? ' Curva cinza tracejada: referência fixada.' : ''}`;
 }
 function renderSim(changed) {
@@ -1002,7 +1051,8 @@ function renderSim(changed) {
   const hl = S.rep === 'logit' || S.rep === 'der' ? [] : (spec.c === 'ver' && S.rep === 'orig' ? [] : [{ y: 1 }]);
   plot('sim-fig', { x: spec.x, y: spec.y, xl: spec.xl, yl: spec.yl, xs: spec.xs, xu: spec.xu, series, hl, ann: annotations(m, P, S.rep), showAnn: S.ann && !S.mystery && !S.noAnn, pts: S.marks || [] });
   $('#sim-fig').setAttribute('aria-label', `${MODELS[m].name}: ${spec.yl.replace(/<[^>]+>/g, '')} em função de ${spec.xl.replace(/<[^>]+>/g, '')}`);
-  keyItems('#sim-legend', S.mystery ? S.mystery.map(it => ({ c: 'ink', dash: it.dash, t: 'Item ' + it.name })) : [{ c: spec.c, t: `${MODELS[m].name} — ${spec.nm}` }, ...(S.ref && S.ref.m === m ? [{ c: 'ghost', t: 'curva de referência' }] : []), ...(S.target && S.target.m === m ? [{ c: 'ink', dash: '2 5', t: 'curva-alvo' }] : [])]);
+  const solo = !S.mystery && !(S.ref && S.ref.m === m) && !(S.target && S.target.m === m); // uma curva só: a legenda da figura basta
+  if (solo) $('#sim-legend').innerHTML = ''; else keyItems('#sim-legend', S.mystery ? S.mystery.map(it => ({ c: 'ink', dash: it.dash, t: 'Item ' + it.name })) : [{ c: spec.c, t: `${MODELS[m].name} — ${spec.nm}` }, ...(S.ref && S.ref.m === m ? [{ c: 'ghost', t: 'curva de referência' }] : []), ...(S.target && S.target.m === m ? [{ c: 'ink', dash: '2 5', t: 'curva-alvo' }] : [])]);
   $('#sim-cap').innerHTML = caption(m, P, spec);
   const [e1, e2] = equations(m, P);
   tex('sim-eq', e1[0], e1[1]); tex('sim-eqn', e2[0], e2[1]);
@@ -1017,22 +1067,42 @@ function renderSim(changed) {
 }
 function bindSimCtl() {
   const box = $('#sim-ctl');
-  box.oninput = e => {
-    const el = e.target, k = el.dataset.k; if (!k) return;
-    const v = +el.value, p = PARAMS[k], max = k === 'N0' ? S.V.K - 1 : p.max;
-    if (!Number.isFinite(v) || v < p.min || v > max) { $('#sim-alert').textContent = `${p.l} deve ficar entre ${fmt(p.min)} e ${fmt(max)} ${p.u}. O valor não foi aplicado.`; return; }
-    if (k === 'K' && S.V.N0 >= v) { $('#sim-alert').textContent = 'K deve ser maior que N₀ no ramo sigmoidal crescente. Reduza N₀ primeiro.'; el.value = S.V.K; return; }
+  const apply = (el, v) => {
+    const k = el.dataset.k, p = PARAMS[k], max = k === 'N0' ? S.V.K - 1 : p.max, cur = S[MODELS[S.model].key][k];
+    if (el.dataset.num && Number.isFinite(v) && Math.abs(v - cur) < 1e-12) { el.value = fmtIn(cur); return; } // mesmo valor: não redesenha (evita perder o clique seguinte)
+    if (!Number.isFinite(v) || v < p.min || v > max) { $('#sim-alert').textContent = `${p.l} deve ficar entre ${fmt(p.min)} e ${fmt(max)} ${p.u}. O valor não foi aplicado.`; if (el.dataset.num) el.value = fmtIn(cur); return; }
+    if (k === 'K' && S.V.N0 >= v) { $('#sim-alert').textContent = 'K deve ser maior que N₀ no ramo sigmoidal crescente. Reduza N₀ primeiro.'; el.value = el.dataset.num ? fmtIn(S.V.K) : S.V.K; return; }
     $('#sim-alert').textContent = '';
     S[MODELS[S.model].key][k] = v;
-    box.querySelectorAll(`[data-k="${k}"]`).forEach(o => { if (o !== el) o.value = +v.toPrecision(6); });
+    box.querySelectorAll(`[data-k="${k}"]`).forEach(o => { o.value = o.dataset.num ? fmtIn(v) : +v.toPrecision(6); });
     HILITE = k; box.querySelectorAll('tr[data-p]').forEach(tr => tr.classList.toggle('hi', tr.dataset.p === k));
     renderSim(true);
     if (S.model === 'ver' && S.vmode === 'ci') box.querySelector('p.small b').textContent = fmt(effParams('ver').t0, 3) + ' dias';
     emit('param', { k, v });
   };
+  box.oninput = e => { const el = e.target; if (el.dataset.k && !el.dataset.num) apply(el, +el.value); };
+  if (!box._num) { box._num = true; numField(box, (el, v) => { if (el.dataset.k) apply(el, v); }); }
   $('#sim-vmode').onclick = e => { const b = e.target.closest('[data-vm]'); if (b) { if (b.dataset.vm === 'ci') S.V.N0 = Math.max(1, Math.min(S.V.K - 1, Math.round(C.verhulst.N(0, S.V)))); else S.V.t0 = effParams('ver').t0; S.vmode = b.dataset.vm; prevP = null; renderSim(); emit('vmode', { v: S.vmode }); } };
   $('#sim-vmode').onchange = e => { if (e.target.id === 'fd-zoom') { S.zoom = e.target.checked; renderSim(true); } };
 }
+const PUBLIC_URL = 'https://brunojesuso88.github.io/laboratorio-modelos-logisticos/';
+function configLink() {
+  const P = S[MODELS[S.model].key], q = new URLSearchParams({ m: S.model, rep: S.rep });
+  if (S.model === 'ver') q.set('vm', S.vmode); if (S.model === 'fd') q.set('zoom', S.zoom ? 1 : 0);
+  for (const [k, v] of Object.entries(P)) if (S.model !== 'ver' || k !== (S.vmode === 'curva' ? 'N0' : 't0')) q.set(k, String(v));
+  return PUBLIC_URL + '?' + q + '#simular';
+}
+function loadConfig() { // aplica ?m=…&rep=…&K=… quando presentes e válidos
+  let q; try { q = new URLSearchParams(location.search); } catch (e) { return; }
+  const m = q.get('m'); if (!m || !MODELS[m]) return;
+  S.model = m; const rp = q.get('rep'); if (['orig', 'norm', 'logit', 'der'].includes(rp)) S.rep = rp;
+  if (m === 'ver' && ['curva', 'ci'].includes(q.get('vm'))) S.vmode = q.get('vm'); if (m === 'fd') S.zoom = q.get('zoom') !== '0';
+  const P = S[MODELS[m].key];
+  for (const k of Object.keys(P)) { const v = parseNum(q.get(k) ?? ''), p = PARAMS[k]; if (p && Number.isFinite(v) && v >= p.min && v <= p.max) P[k] = v; }
+  if (S.V.N0 >= S.V.K) S.V.N0 = Math.max(1, Math.round(S.V.K / 20));
+}
+loadConfig();
+$('#sim-link').onclick = async () => { const u = configLink(), msg = $('#sim-linkmsg'); try { await navigator.clipboard.writeText(u); msg.textContent = 'Link copiado.'; } catch (e) { msg.innerHTML = `Copie: <input class="linkbox" readonly value="${esc(u)}" aria-label="Link desta configuração">`; msg.querySelector('input').select(); } setTimeout(() => { if (msg.textContent === 'Link copiado.') msg.textContent = ''; }, 4000); };
 $('#sim-ann').onchange = e => { S.ann = e.target.checked; renderSim(true); emit('ann'); };
 $('#sim-pin').onclick = () => { S.ref = { m: S.model, P: effParams(S.model) }; renderSim(true); emit('pin'); };
 $('#sim-unpin').onclick = () => { S.ref = null; renderSim(true); emit('pin'); };
@@ -1040,13 +1110,13 @@ $('#sim-reset').onclick = () => { Object.assign(S, structuredClone(INIT)); S.ref
 
 // ------------------------------------------------------------ COMPARAR
 const SY = { model: 'i2', mode: 'direta', edit: 'tri', E0: 0.5, lambda: +(C.KB_EV * 300).toFixed(6), a: 1, b: 0, c: 0.2, T: 300, mu: 0.5 };
-let cmpMode = '3';
+let cmpMode = '1';
 function renderCmp() {
   seg('#cmp-mode', [['1', 'I · Eixos originais'], ['2', 'II · Argumento comum z'], ['3', 'III · Sincronização TRI–FD']], cmpMode, v => { cmpMode = v; renderCmp(); emit('cmp', { v }); });
   for (const k of ['1', '2', '3']) $('#cmp-' + k).style.display = k === cmpMode ? '' : 'none';
   const pv = effParams('ver'), pi = effParams('i2'), pf = effParams('fd');
   if (cmpMode === '1') {
-    const one = (id, m, P, panel) => { const sp = modelSpec(m, P, 'orig'); plot(id, { ...sp, panel, series: [{ f: sp.f, c: sp.c, name: sp.nm }], ann: annotations(m, P, 'orig').filter(a => a.t === 'band' || a.t === 'pt' || a.t === 'h') }); };
+    const one = (id, m, P, panel) => { const sp = modelSpec(m, P, 'orig'); plot(id, { ...sp, panel, series: [{ f: sp.f, c: sp.c, name: sp.nm }], ann: annotations(m, P, 'orig').filter(a => a.t === 'band' || a.t === 'pt') }); };
     one('c1-v', 'ver', pv, '(a) Verhulst'); one('c1-t', 'i2', pi, '(b) TRI 2PL'); one('c1-f', 'fd', pf, '(c) Fermi–Dirac');
     $('#c1-vp').innerHTML = `<i>K</i> = ${fmt(pv.K, 0)}, <i>r</i> = ${fmt(pv.r)} dia<sup>−1</sup>, <i>t</i><sub>0</sub> = ${fmt(pv.t0, 2)} dias`;
     $('#c1-tp').innerHTML = `<i>a</i> = ${fmt(pi.a)}, <i>b</i> = ${fmt(pi.b)}`;
@@ -1082,11 +1152,12 @@ function renderSync(changed) {
     if (SY.model !== 'rasch') rows.push({ k: 'a', v: d.a, locked: !tri });
     rows.push({ k: 'b', v: d.b, locked: !tri });
     if (SY.model === 'i3') rows.push({ k: 'c', v: SY.c });
-    rows.push({ k: 'T', v: d.T, locked: tri }, { k: 'mu', v: d.mu, locked: tri, min: 0, max: 1 }, { k: 'E0', v: SY.E0, s: 1 }, { k: 'lambda', v: SY.lambda, s: 1 });
+    rows.push({ k: 'T', v: d.T, locked: tri }, { k: 'mu', v: d.mu, locked: tri, min: 0, max: 1 });
     $('#c3-ctl').innerHTML = ptable('<b>Tabela 5.</b> Parâmetros da sincronização', rows, 'sy');
-    bindHilite($('#c3-ctl'), ['c3-a', 'c3-b']);
+    $('#c3-ctl2').innerHTML = ptable('Escala da transformação', [{ k: 'E0', v: SY.E0, s: 1 }, { k: 'lambda', v: SY.lambda, s: 1 }], 'sy');
+    bindHilite($('#c3-ctl'), ['c3-a', 'c3-b']); bindHilite($('#c3-ctl2'), ['c3-a', 'c3-b']);
   } else {
-    for (const k of ['a', 'b', 'T', 'mu']) { const locked = tri === (k === 'T' || k === 'mu'); if (locked) $('#c3-ctl').querySelectorAll(`[data-k="${k}"]`).forEach(o => o.value = +d[k].toPrecision(6)); }
+    for (const k of ['a', 'b', 'T', 'mu']) { const locked = tri === (k === 'T' || k === 'mu'); if (locked) $('#c3-ctl').querySelectorAll(`[data-k="${k}"]`).forEach(o => o.value = o.dataset.num ? fmtIn(d[k]) : +d[k].toPrecision(6)); }
   }
   const cfg = { mode: SY.mode, E0: SY.E0, lambda: SY.lambda }, c = SY.model === 'i3' ? SY.c : 0;
   const ip = { a: d.a, b: d.b, c }, fp = { mu: d.mu, T: d.T }, kT = C.KB_EV * d.T;
@@ -1117,23 +1188,28 @@ function renderSync(changed) {
   afterRender();
 }
 function bindSync() {
-  $('#c3-ctl').oninput = e => {
-    const el = e.target, k = el.dataset.k || el.dataset.s; if (!k) return;
-    const v = +el.value, old = { ...SY };
-    if (!Number.isFinite(v)) return;
+  const apply = (el, v) => {
+    const k = el.dataset.k || el.dataset.s, old = { ...SY };
+    if (el.dataset.num && Number.isFinite(v) && Math.abs(v - SY[k]) < 1e-12) { el.value = fmtIn(SY[k]); return; }
+    if (!Number.isFinite(v)) { $('#c3-alert').textContent = 'Digite um número.'; if (el.dataset.num) el.value = fmtIn(SY[k]); return; }
     SY[k] = v;
     let d; try { d = syncDerive(); } catch (er) { Object.assign(SY, old); $('#c3-alert').textContent = er.message; return; }
     const out = Object.entries(SYB).find(([q, [lo, hi]]) => d[q] < lo - 1e-9 || d[q] > hi + 1e-9);
     if (out) {
-      Object.assign(SY, old); el.value = old[k];
+      Object.assign(SY, old); el.value = el.dataset.num ? fmtIn(old[k]) : old[k];
       $('#c3-alert').textContent = `A alteração levaria ${out[0] === 'mu' ? 'μ' : out[0]} a ${fmt(d[out[0]], 4)}, fora do intervalo permitido (${fmt(out[1][0])} a ${fmt(out[1][1])}). Ela não foi aplicada — não há truncamento silencioso. Ajuste λ ou E₀ para ampliar a faixa.`;
       return;
     }
     $('#c3-alert').textContent = '';
-    $('#c3-ctl').querySelectorAll(`[data-k="${k}"],[data-s="${k}"]`).forEach(o => { if (o !== el) o.value = +v.toPrecision(6); });
+    document.querySelectorAll(`#c3-ctl [data-k="${k}"],#c3-ctl [data-s="${k}"],#c3-ctl2 [data-s="${k}"]`).forEach(o => { o.value = o.dataset.num ? fmtIn(v) : +v.toPrecision(6); });
     renderSync(true);
     emit('sync', { k });
   };
+  for (const id of ['#c3-ctl', '#c3-ctl2']) {
+    const box = $(id);
+    box.oninput = e => { const el = e.target; if ((el.dataset.k || el.dataset.s) && !el.dataset.num) apply(el, +el.value); };
+    if (!box._num) { box._num = true; numField(box, (el, v) => { if (el.dataset.k || el.dataset.s) apply(el, v); }); }
+  }
 }
 $('#c3-l300').onclick = () => { const old = SY.lambda; SY.lambda = +(C.KB_EV * 300).toFixed(6); const d = syncDerive(); if (Object.entries(SYB).some(([q, [lo, hi]]) => d[q] < lo || d[q] > hi)) { SY.lambda = old; $('#c3-alert').textContent = 'Com essa escala os parâmetros vinculados sairiam do intervalo permitido.'; return; } renderSync(); };
 
@@ -1231,10 +1307,10 @@ function simPrep(o) {
   goView('simular'); renderSim();
 }
 function syncReset() { Object.assign(SY, { model: 'i2', mode: 'direta', edit: 'tri', E0: 0.5, lambda: +(C.KB_EV * 300).toFixed(6), a: 1, b: 0, c: 0.2, T: 300, mu: 0.5 }); }
-function inputFor(k) { return document.querySelector(`#sim-ctl input[data-k="${k}"][data-num], #c3-ctl input[data-k="${k}"][data-num], #c3-ctl input[data-s="${k}"][data-num]`); }
-function setVal(k, v) { const el = inputFor(k); if (!el) return; el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }
+function inputFor(k) { return document.querySelector(`#sim-ctl input[data-k="${k}"][data-num], #c3-ctl input[data-k="${k}"][data-num], #c3-ctl2 input[data-s="${k}"][data-num]`); }
+function setVal(k, v) { const el = inputFor(k); if (!el) return; el.value = fmtIn(v); el.dispatchEvent(new Event('change', { bubbles: true })); }
 function animateTo(k, to) { // demonstração do nível 3 de dica: o tutor move o controle "em câmera lenta"
-  const el = inputFor(k); if (!el) return; const from = +el.value;
+  const el = inputFor(k); if (!el) return; const from = parseNum(el.value);
   if (REDUCED) { setVal(k, to); return; }
   let i = 0; const n = 14, tick = () => { i++; setVal(k, +(from + (to - from) * i / n).toPrecision(6)); if (i < n) setTimeout(tick, 55); }; tick();
 }
@@ -1426,8 +1502,8 @@ const PHASES = [
         dicas: ['a é a primeira linha da Tabela 5.', 'Digite 2 em a.', () => animateTo('a', 2)],
         reg: () => `T = λ/(a·kB): com a = ${n2(SY.a)}, T = ${n2(SY.lambda / (SY.a * C.KB_EV), 0)} K.`,
         ret: 'Com <i>λ</i> fixo, item mais discriminativo corresponde a “temperatura” menor: transição mais abrupta.' },
-      { id: '5.3', t: 'A escala', alvo: '#c3-ctl tr[data-p="lambda"], #c3-kv', ver: '#c3-a, #c3-b', libera: { p: ['lambda'] }, badge: 'L6',
-        fala: 'Agora mude <b><i>λ</i></b> sem mexer em <i>a</i>. O que acontece com a “temperatura”?',
+      { id: '5.3', t: 'A escala', alvo: '#c3-ctl2 tr[data-p="lambda"], #c3-kv', ver: '#c3-a, #c3-b', libera: { p: ['lambda'] }, badge: 'L6',
+        fala: 'Agora mude <b><i>λ</i></b> (em “Opções avançadas”, já aberto) sem mexer em <i>a</i>. O que acontece com a “temperatura”?',
         check: c => Math.abs(c.SY.lambda - c.base.SY.lambda) > 0.002 && Math.abs(c.SY.a - c.base.SY.a) < 1e-9,
         dicas: ['λ é a última linha da Tabela 5.', 'Digite 0,05 em λ.', () => animateTo('lambda', 0.05)],
         reg: () => `Leitura 6 — T depende da escala λ escolhida (agora λ = ${n2(SY.lambda * 1000, 1)} meV): não é uma temperatura da aprendizagem.`,
@@ -1535,7 +1611,7 @@ window.__TUTLOCK = () => {
   document.querySelectorAll('.tut-locked').forEach(e => { e.classList.remove('tut-locked'); e.inert = false; e.removeAttribute('title'); });
   if (!TS.on) return;
   const A = allowed(), why = 'Desbloqueia mais adiante no tutorial';
-  document.querySelectorAll('#sim-ctl tr[data-p], #c3-ctl tr[data-p]').forEach(tr => { if (!A.p.has(tr.dataset.p)) lockEl(tr, why); });
+  document.querySelectorAll('#sim-ctl tr[data-p], #c3-ctl tr[data-p], #c3-ctl2 tr[data-p]').forEach(tr => { if (!A.p.has(tr.dataset.p)) lockEl(tr, why); });
   document.querySelectorAll('#sim-model button').forEach(b => { if (!A.m.has(b.dataset.v) && b.getAttribute('aria-pressed') !== 'true') lockEl(b, why); });
   document.querySelectorAll('#sim-rep button').forEach(b => { if (!A.r.has(b.dataset.v) && b.getAttribute('aria-pressed') !== 'true') lockEl(b, why); });
   if (!A.vm) document.querySelectorAll('#sim-vmode [data-vm]').forEach(b => { if (b.getAttribute('aria-pressed') !== 'true') lockEl(b, why); });
@@ -1565,7 +1641,9 @@ function startMission() {
   m.prep?.();
   TS.base = snapshot(); TS.hint = 0; TS.bet = null; TS.skipped = false; TS.cur = { id: null, x: null }; TS.choiceFb = null; TS.numFb = null;
   TS.st = m.aposta ? 'aposta' : 'acao';
-  afterRender(); renderDock(); focusTarget(); armIdle();
+  afterRender();
+  document.querySelectorAll(m.alvo).forEach(el => { const d = el.closest('details'); if (d) d.open = true; }); // alvo dentro de seção recolhida: abre
+  renderDock(); focusTarget(); armIdle();
 }
 function clearTimers() { clearTimeout(TS.idle); clearTimeout(TS.hold); TS.hold = null; }
 function armIdle() { clearTimeout(TS.idle); if (TS.st !== 'acao' || TS.hint > 0) return; TS.idle = setTimeout(() => { if (TS.on && TS.st === 'acao' && TS.hint === 0) { TS.hint = 1; renderDock(); } }, 25000); }
