@@ -128,7 +128,7 @@ details{margin:12px 0;font:15px "IBM Plex Sans",Arial,sans-serif}summary{cursor:
 .tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--mute);margin-right:4px}
 textarea{width:100%;min-height:200px;font:15px/1.5 "IBM Plex Sans",Arial,sans-serif;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
 .card{border-top:2px solid var(--ink);padding-top:12px}
-footer{border-top:1px solid var(--ink);padding:20px max(5vw,16px);color:var(--mute);font-size:15px}
+footer{border-top:1px solid var(--line);padding:10px max(5vw,16px);color:var(--mute);font:13px "IBM Plex Sans",Arial,sans-serif}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media(max-width:600px){.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0!important;padding:3px 0;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;font:600 13px "IBM Plex Sans",Arial,sans-serif;color:var(--mute)}.stack td:empty{display:none}}
 @media(prefers-reduced-motion:no-preference){svg .an,svg .anl,svg .bandr{transition:all .15s}}
@@ -206,7 +206,7 @@ body.tut-noparams #sim-ctl,body.tut-noparams #sim-kv,body.tut-noparams .eqbox,bo
         <figcaption id="sim-cap"></figcaption>
       </figure>
       <div class="opts-row ui o1">
-        <label><input type="checkbox" id="sim-ann" checked> Mostrar a geometria dos parâmetros</label>
+        <label><input type="checkbox" id="sim-ann"> Mostrar a geometria dos parâmetros</label>
         <span class="small mute">Passe o cursor sobre um parâmetro da Tabela 1 para destacá-lo na figura. Use as setas ← → sobre a figura para mover o cursor.</span>
       </div>
       <div class="eqbox o2"><div class="eqn" id="sim-eq" aria-live="polite"></div><span class="no">(1)</span></div>
@@ -345,10 +345,7 @@ body.tut-noparams #sim-ctl,body.tut-noparams #sim-kv,body.tut-noparams .eqbox,bo
   <div class="td-body"><div class="td-av" aria-hidden="true">PG</div><div class="td-main"><p class="td-who">Prof. Gelado</p><div id="td-msg" aria-live="polite"></div><div id="td-act"></div></div></div>
 </div>
 <aside id="tut-drawer" class="ui" aria-label="Caderno de campo" hidden><div class="td-head"><b>Caderno de campo</b><button class="btn sm tn-close" type="button">Fechar</button></div><div class="tn-list"></div></aside>
-<footer>
-  <p><b>Versão 2.0.0</b> (modo tutorial) · núcleo matemático <span id="ver"></span> · <i>k</i><sub>B</sub> = 8,617333262 × 10<sup>−5</sup> eV K<sup>−1</sup> · TRI com <i>D</i> = 1 · paleta Okabe–Ito com traço redundante.</p>
-  <p>Privacidade: a página não coleta, não envia e não armazena dados pessoais; somente rascunhos do módulo Planejar ficam no armazenamento local do navegador. Os valores de “temperatura” e “potencial químico” obtidos pela sincronização são coordenadas de uma transformação matemática, não grandezas medidas em processos de aprendizagem.</p>
-</footer>
+<footer>Versão 2.1 · Prof. Gelado · Nenhum dado pessoal é coletado<span id="ver" hidden></span></footer>
 
 <script>
 /*
@@ -812,7 +809,7 @@ function seg(el, items, cur, onpick) {
 
 // ------------------------------------------------------------ estado
 const INIT = { V: { K: 1000, r: 0.5, t0: 6, N0: 50 }, R: { b: 0 }, I2: { a: 1.2, b: 0 }, I3: { a: 1.2, b: 0, c: 0.2 }, F: { mu: 0.5, T: 300 } };
-const S = { model: 'ver', rep: 'orig', vmode: 'curva', zoom: true, ann: true, ...structuredClone(INIT), ref: null };
+const S = { model: 'ver', rep: 'orig', vmode: 'curva', zoom: true, ann: false, ...structuredClone(INIT), ref: null };
 const MODELS = { ver: { name: 'Verhulst', key: 'V' }, rasch: { name: 'Rasch/1PL', key: 'R' }, i2: { name: 'TRI 2PL', key: 'I2' }, i3: { name: 'TRI 3PL', key: 'I3' }, fd: { name: 'Fermi–Dirac', key: 'F' } };
 const PARAMS = {
   K: { l: 'Capacidade de suporte', s: 'K', u: 'indivíduos', min: 100, max: 5000, step: 50 },
@@ -995,6 +992,7 @@ function renderSim(changed) {
       + (m === 'ver' && S.vmode === 'ci' ? `<p class="small mute">Instante central calculado: <b>${fmt(P.t0, 3)} dias</b></p>` : '');
     bindHilite($('#sim-ctl'), ['sim-fig']);
   }
+  $('#sim-ann').checked = !!S.ann;
   const spec = modelSpec(m, P, S.rep);
   const series = [];
   if (S.ref && S.ref.m === m) { const rs = modelSpec(m, S.ref.P, S.rep); series.push({ f: rs.f, c: 'ghost', name: 'referência', w: 2 }); }
@@ -1616,7 +1614,7 @@ function phaseDone(st) {
 }
 function exitTutorial(toMap = true) {
   clearTimers(); TS.on = false; TS.st = 'idle'; TS.ch = null; TS.chId = null;
-  Object.assign(S, { target: null, mystery: null, marks: null, noAnn: false });
+  Object.assign(S, { target: null, mystery: null, marks: null, noAnn: false, ann: false }); // ao sair, volta ao padrão: geometria desligada
   document.body.classList.remove('tut-on', 'tut-noparams'); $('#tut-dock').hidden = true; $('#tut-drawer').hidden = true; paintMask();
   afterRender();
   if (toMap) goView('aprender');
