@@ -206,6 +206,10 @@ details.more[open]>summary{margin-bottom:8px}
 #c3-adv .toolbar{margin:6px 0 10px}#c3-adv .btn{margin-top:8px}
 .tm-card.off{opacity:1;border-top-color:var(--line);background:var(--paper)}
 .tm-card.off h3,.tm-card.off p{color:var(--mute)}
+/* ---------- v2.4: leitura em x ---------- */
+.probe{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--mute)}
+.probe input{width:76px;min-height:34px;padding:4px 8px;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;text-align:right}
+.readout .rtag{color:var(--mute);font-weight:400}
 /* ---------- v2.3: camadas de leitura ---------- */
 .layers{display:flex;flex-wrap:wrap;gap:2px 16px;align-items:center;margin:8px 0 0;padding-top:6px;border-top:1px solid var(--line)}
 .layers>.lab,.lay-opt .lab{font-size:13px;color:var(--mute)}
@@ -252,6 +256,7 @@ svg .morphlbl{font:600 13px "IBM Plex Sans",Arial,sans-serif;fill:var(--mute)}
         <button class="btn sm" id="sim-pin" type="button">Fixar referência</button>
         <button class="btn sm" id="sim-unpin" type="button">Limpar referência</button>
         <button class="btn sm" id="sim-reset" type="button">Valores iniciais</button>
+        <label class="probe">Ler em <input id="sim-probe" type="text" inputmode="decimal" autocomplete="off" placeholder="x" aria-label="Ler a curva no ponto x (valor do eixo horizontal)"></label>
         <button class="btn sm" id="sim-link" type="button">Copiar link</button>
         <span class="small mute" id="sim-linkmsg" aria-live="polite"></span>
       </div>
@@ -402,7 +407,7 @@ svg .morphlbl{font:600 13px "IBM Plex Sans",Arial,sans-serif;fill:var(--mute)}
   <div class="td-body"><div class="td-av" aria-hidden="true">PG</div><div class="td-main"><p class="td-who">Prof. Gelado</p><div id="td-msg" aria-live="polite"></div><div id="td-act"></div></div></div>
 </div>
 <aside id="tut-drawer" class="ui" aria-label="Caderno de campo" hidden><div class="td-head"><b>Caderno de campo</b><button class="btn sm tn-close" type="button">Fechar</button></div><div class="tn-list"></div></aside>
-<footer>Versão 2.3 · Prof. Gelado · Nenhum dado pessoal é coletado<span id="ver" hidden></span></footer>
+<footer>Versão 2.4 · Prof. Gelado · Nenhum dado pessoal é coletado<span id="ver" hidden></span></footer>
 
 <script>
 /*
@@ -897,7 +902,7 @@ function setCursor(id, x, quiet) {
     const y = se.f(x); if (!Number.isFinite(y)) continue;
     if (se.fam) continue;
     if (y >= spec.y[0] && y <= spec.y[1]) cur.insertAdjacentHTML('beforeend', `<circle cx="${px}" cy="${m.Y(y)}" r="4" fill="var(--bg)" stroke="${COL[se.c]}" stroke-width="2"/>`);
-    if (se.name) lines.push(`${se.name} = ${fmt(y, 5)}`);
+    if (se.name) lines.push(`${se.name}${se.tag ? ` <span class="rtag">(${se.tag})</span>` : ''} = ${fmt(y, 5)}${spec.pct ? ` <span class="rtag">(${fmt(100 * y, 1)} %)</span>` : ''}`);
   }
   ro.innerHTML = `<b>${spec.xs} = ${fmt(x, 4)}${spec.xu ? ' ' + spec.xu : ''}</b>${spec.extra ? '<br>' + spec.extra(x) : ''}<br>` + lines.join('<br>');
   ro.style.display = 'block';
@@ -912,7 +917,7 @@ function bindHover(id) {
   const fig = document.getElementById(id);
   const toX = ev => { const spec = FIGS.get(id), m = spec?._m; if (!m) return null; const px = ev.clientX - fig.getBoundingClientRect().left; return spec.x[0] + (px - m.L) / (m.W - m.L - m.R) * (spec.x[1] - spec.x[0]); };
   fig.addEventListener('pointermove', ev => setCursor(id, toX(ev)));
-  fig.addEventListener('pointerleave', () => { setCursor(id, null); const sp = FIGS.get(id); if (sp?.link) setCursor(sp.link.id, null, true); });
+  fig.addEventListener('pointerleave', () => { setCursor(id, id === 'sim-fig' && S.probe != null ? S.probe : null); const sp = FIGS.get(id); if (sp?.link) setCursor(sp.link.id, null, true); });
   fig.addEventListener('keydown', ev => {
     const spec = FIGS.get(id); if (!spec) return; const span = spec.x[1] - spec.x[0];
     let x = spec.cx ?? (spec.x[0] + span / 2);
@@ -933,7 +938,7 @@ function seg(el, items, cur, onpick) {
 // ------------------------------------------------------------ estado
 const INIT = { V: { K: 1000, r: 0.5, t0: 6, N0: 50 }, R: { b: 0 }, I2: { a: 1.2, b: 0 }, I3: { a: 1.2, b: 0, c: 0.2 }, F: { mu: 0.5, T: 300 } };
 const RM = (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })();
-const S = { model: 'ver', rep: 'orig', vmode: 'curva', zoom: true, ann: false, ...structuredClone(INIT), ref: null, fam: false, famK: null, part: false, partN: 'm', seed: 1, anim: !RM };
+const S = { model: 'ver', rep: 'orig', vmode: 'curva', zoom: true, ann: false, ...structuredClone(INIT), ref: null, fam: false, famK: null, part: false, partN: 'm', seed: 1, anim: !RM, probe: null };
 const MODELS = { ver: { name: 'Verhulst', key: 'V' }, rasch: { name: 'Rasch/1PL', key: 'R' }, i2: { name: 'TRI 2PL', key: 'I2' }, i3: { name: 'TRI 3PL', key: 'I3' }, fd: { name: 'Fermi–Dirac', key: 'F' } };
 const PARAMS = {
   K: { l: 'Capacidade de suporte', s: 'K', u: 'indivíduos', min: 100, max: 5000, step: 50 },
@@ -1194,7 +1199,9 @@ function renderSim(changed) {
   $('#sim-ann').checked = !!S.ann;
   const spec = modelSpec(m, P, S.rep);
   const series = [];
-  if (S.ref && S.ref.m === m) { const rs = modelSpec(m, S.ref.P, S.rep); series.push({ f: rs.f, c: 'ghost', name: 'referência', w: 2 }); }
+  const refDiff = S.ref && S.ref.m === m ? tableKeys(m).filter(k => S.ref.P[k] != null && Math.abs(S.ref.P[k] - P[k]) > 1e-12) : [];
+  const tagOf = Q => refDiff.map(k => `${PARAMS[k].s} = ${fmt(Q[k], 4)}`).join(', ');
+  if (S.ref && S.ref.m === m) { const rs = modelSpec(m, S.ref.P, S.rep); series.push({ f: rs.f, c: 'ghost', name: 'referência', tag: tagOf(S.ref.P), w: 2 }); }
   if (S.target && S.target.m === m) { const ts = modelSpec(m, S.target.P, S.rep); series.push({ f: ts.f, c: 'ink', name: 'alvo', dash: '2 5', w: 2.2 }); }
   if (S.mystery) S.mystery.forEach(it => series.push({ f: safe(th => C.irt.P(th, it.P)), c: 'ink', name: it.name, dash: it.dash, w: 2.4 }));
   // camadas de leitura (desligadas durante o tutorial e os desafios)
@@ -1210,7 +1217,7 @@ function renderSim(changed) {
     if (S.rep === 'der') { const hi = Math.max(...ex.map(e => e[1])), lo = Math.min(...ex.map(e => e[0])); if (hi > spec.y[1]) spec.y = [spec.y[0], hi * 1.12]; if (lo < spec.y[0]) spec.y = [lo * 1.12, spec.y[1]]; }
     capX += coincide ? ` Curvas finas: família variando ${sym}; nesta representação todas coincidem com a curva atual, ou seja, ${sym} não altera a forma.` : ` Curvas finas: família variando ${sym} (${fam.map(F => fmt(F.w, 4)).join('; ')}) com os demais parâmetros fixos; a curva espessa é a atual.`;
   }
-  if (!S.mystery) series.push({ f: spec.f, c: spec.c, name: spec.nm, strong: true, lab: fam && !coincide ? `<i>${PARAMS[famK].s}</i> = ${fmt(P[famK], 4)} (atual)` : undefined });
+  if (!S.mystery) series.push({ f: spec.f, c: spec.c, name: spec.nm, tag: refDiff.length ? tagOf(P) : '', strong: true, lab: fam && !coincide ? `<i>${PARAMS[famK].s}</i> = ${fmt(P[famK], 4)} (atual)` : undefined });
   if (fam && !coincide) { const all = [...fam.map((F, i) => [F.w, series[series.length - 1 - fam.length + i]]), [P[famK], series[series.length - 1]]].sort((a, b) => a[0] - b[0]); all.forEach(([, se], i) => { se.li = i; }); }
   if (lay && S.part) { pr = particles(m, P, S.rep, spec); if (pr.kind) capX += { tri: ' Pontos: respostas simuladas (cheios, acerto; vazios, erro); quadrados: proporção de acertos em cada faixa de <i>θ</i>.', fd: ' Pontos: estados simulados (cheios, ocupados; vazios, livres); quadrados: fração ocupada em cada nível de energia.', ver: ' Linhas finas irregulares: populações simuladas com ruído demográfico.' }[pr.kind]; }
   $('#sim-fam').checked = S.fam; $('#sim-part').checked = S.part; $('#sim-anim').checked = S.anim;
@@ -1218,8 +1225,10 @@ function renderSim(changed) {
   $('#sim-partopt').hidden = !(lay && S.part); if (lay && S.part) seg('#sim-partn', [['p', 'Pequena'], ['m', 'Média'], ['g', 'Grande']], S.partN, v => { S.partN = v; renderSim(true); emit('layer', { partN: v }); });
   const pn = $('#sim-partnote'); pn.hidden = !pr; pn.innerHTML = pr ? pr.note : '';
   const hl = S.rep === 'logit' || S.rep === 'der' ? [] : (spec.c === 'ver' && S.rep === 'orig' ? [] : [{ y: 1 }]);
-  plot('sim-fig', { model: m, rep: S.rep, x: spec.x, y: spec.y, xl: spec.xl, yl: spec.yl, xs: spec.xs, xu: spec.xu, series, hl, ann: annotations(m, P, S.rep), showAnn: S.ann && !S.mystery && !S.noAnn, pts: S.marks || [], layer: pr?.layer, labRule: S.rep === 'der' ? 'ext' : famK === 'c' ? 'left' : 'lvl', morph: S._morph || null });
+  plot('sim-fig', { model: m, rep: S.rep, pct: m !== 'ver' && (S.rep === 'orig' || S.rep === 'norm'), x: spec.x, y: spec.y, xl: spec.xl, yl: spec.yl, xs: spec.xs, xu: spec.xu, series, hl, ann: annotations(m, P, S.rep), showAnn: S.ann && !S.mystery && !S.noAnn, pts: S.marks || [], layer: pr?.layer, labRule: S.rep === 'der' ? 'ext' : famK === 'c' ? 'left' : 'lvl', morph: S._morph || null });
   S._morph = null;
+  if (S.probe != null) setCursor('sim-fig', S.probe, true);
+  const pb = $('#sim-probe'); if (pb && document.activeElement !== pb) pb.value = S.probe == null ? '' : fmtIn(S.probe);
   $('#sim-fig').setAttribute('aria-label', `${MODELS[m].name}: ${spec.yl.replace(/<[^>]+>/g, '')} em função de ${spec.xl.replace(/<[^>]+>/g, '')}`);
   const solo = !S.mystery && !(S.ref && S.ref.m === m) && !(S.target && S.target.m === m) && !fam && !pr?.layer; // uma curva só: a legenda da figura basta
   if (solo) $('#sim-legend').innerHTML = ''; else keyItems('#sim-legend', S.mystery ? S.mystery.map(it => ({ c: 'ink', dash: it.dash, t: 'Item ' + it.name })) : [{ c: spec.c, t: `${MODELS[m].name} — ${spec.nm}` }, ...(S.ref && S.ref.m === m ? [{ c: 'ghost', t: 'curva de referência' }] : []), ...(S.target && S.target.m === m ? [{ c: 'ink', dash: '2 5', t: 'curva-alvo' }] : []), ...(fam ? [{ mk: `<line x1="1" x2="35" y1="6" y2="6" stroke="${COL[spec.c]}" stroke-width="1.4" stroke-opacity=".5"/>`, t: `família: variando ${PARAMS[famK].s}` }] : []), ...(pr?.layer ? LAYKEY[pr.kind](COL[spec.c]) : [])]);
@@ -1261,6 +1270,8 @@ function configLink() {
   if (S.model === 'ver') q.set('vm', S.vmode); if (S.model === 'fd') q.set('zoom', S.zoom ? 1 : 0);
   for (const [k, v] of Object.entries(P)) if (S.model !== 'ver' || k !== (S.vmode === 'curva' ? 'N0' : 't0')) q.set(k, String(v));
   if (S.fam) q.set('fam', S.famK || FAMDEF[S.model]); if (S.part) q.set('part', S.partN);
+  if (S.probe != null) q.set('x', String(S.probe));
+  if (S.ref && S.ref.m === S.model) { const d = tableKeys(S.model).filter(k => S.ref.P[k] != null && Math.abs(S.ref.P[k] - P[k]) > 1e-12).map(k => `${k}:${S.ref.P[k]}`); if (d.length) q.set('ref', d.join(';')); }
   return PUBLIC_URL + '?' + q + '#simular';
 }
 function loadConfig() { // aplica ?m=…&rep=…&K=… quando presentes e válidos
@@ -1273,6 +1284,12 @@ function loadConfig() { // aplica ?m=…&rep=…&K=… quando presentes e válid
   if (S.V.N0 >= S.V.K) S.V.N0 = Math.max(1, Math.round(S.V.K / 20));
   const fk = q.get('fam'); if (fk && PARAMS[fk]) { S.fam = true; S.famK = fk; }
   const pz = q.get('part'); if (PSIZE[pz]) { S.part = true; S.partN = pz; }
+  const xv = parseNum(q.get('x') ?? ''); if (Number.isFinite(xv)) S.probe = xv;
+  const rf = q.get('ref'); // ex.: ref=a:0.5;b:1 → curva de referência com esses valores, demais iguais
+  if (rf) { const RP = { ...effParams(m) }; let ok = false;
+    for (const kv of rf.split(';')) { const [k, v] = kv.split(':'), x = parseNum(v ?? ''), p = PARAMS[k]; if (p && k in RP && Number.isFinite(x) && x >= p.min && x <= p.max) { RP[k] = x; ok = true; } }
+    if (m === 'ver' && S.vmode === 'ci') RP.t0 = C.verhulst.t0FromN0(RP.K, RP.r, Math.min(RP.N0, RP.K - 1));
+    if (ok) S.ref = { m, P: RP }; }
 }
 loadConfig();
 $('#sim-link').onclick = async () => { const u = configLink(), msg = $('#sim-linkmsg'); try { await navigator.clipboard.writeText(u); msg.textContent = 'Link copiado.'; } catch (e) { msg.innerHTML = `Copie: <input class="linkbox" readonly value="${esc(u)}" aria-label="Link desta configuração">`; msg.querySelector('input').select(); } setTimeout(() => { if (msg.textContent === 'Link copiado.') msg.textContent = ''; }, 4000); };
@@ -1283,6 +1300,8 @@ $('#sim-anim').onchange = e => { S.anim = e.target.checked; };
 $('#sim-reroll').onclick = () => { S.seed = S.seed % 9973 + 1; renderSim(true); emit('layer', { seed: S.seed }); };
 $('#sim-pin').onclick = () => { S.ref = { m: S.model, P: effParams(S.model) }; renderSim(true); emit('pin'); };
 $('#sim-unpin').onclick = () => { S.ref = null; renderSim(true); emit('pin'); };
+{ const pb = $('#sim-probe'), go = () => { const v = parseNum(pb.value); S.probe = Number.isFinite(v) ? v : null; setCursor('sim-fig', S.probe); emit('probe', { x: S.probe }); };
+  pb.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } }); pb.addEventListener('change', go); }
 $('#sim-reset').onclick = () => { Object.assign(S, structuredClone(INIT)); S.ref = null; prevP = null; renderSim(); };
 
 // ------------------------------------------------------------ COMPARAR

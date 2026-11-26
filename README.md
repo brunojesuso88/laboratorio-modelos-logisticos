@@ -19,4 +19,4 @@ Ambiente digital interativo para a formação de professores de Ciências da Nat
 - As equações são renderizadas com MathJax 3, que exige internet. Sem conexão, a página mostra as equações em texto.
 - A coincidência entre as curvas é uma **correspondência matemática**, não uma identidade entre os fenômenos. Os valores de "temperatura" obtidos na sincronização são coordenadas de uma transformação, não grandezas da aprendizagem.
 
-Autor: Bruno ("Prof. Gelado") · Versão 2.3
+Autor: Bruno ("Prof. Gelado") · Versão 2.4
