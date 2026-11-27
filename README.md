@@ -6,6 +6,8 @@ Ambiente digital interativo para a formação de professores de Ciências da Nat
 
 **Acesse:** https://brunojesuso88.github.io/laboratorio-modelos-logisticos/
 
+**Apresentação** (Instituto Dom Barreto, 27/11/2026): [A correlação entre a distribuição de Fermi–Dirac e a Teoria de Resposta ao Item](https://brunojesuso88.github.io/laboratorio-modelos-logisticos/apresentacao/) · [PDF](https://brunojesuso88.github.io/laboratorio-modelos-logisticos/apresentacao/Fermi-Dirac-e-TRI.pdf)
+
 ## Módulos
 
 - **Aprender:** modo tutorial em 6 fases, com missões guiadas, desafios, insígnias e caderno de campo. As 8 atividades investigativas estão no Modo livre.

@@ -1,0 +1,2042 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Laboratório de Modelos Logísticos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,600;1,400;1,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+window.MathJax = { svg: { fontCache: 'local' }, startup: { typeset: false, ready() { MathJax.startup.defaultReady(); window.__mjReady = true; document.dispatchEvent(new Event('mathjax-ready')); } } };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+<style>
+/* VOICE: artigo científico de ensino de Física — sóbrio, exato, legível.
+   IDEA: cada módulo é uma página de periódico: figuras numeradas com legenda, tabelas de parâmetros, equações em notação matemática.
+   PICTURE: a figura viva, com a geometria de cada parâmetro desenhada sobre a curva (assíntota, centro, tangente, largura 10–90 %).
+   COLOUR and TYPE: papel branco e tinta preta; paleta Okabe–Ito validada (Verhulst verde-azulado, TRI azul, Fermi–Dirac vermelhão), sempre com traço redundante. STIX Two Text + IBM Plex Sans; equações MathJax.
+   LAYOUT: figura + tabela de parâmetros lado a lado; abaixo de 900 px a tabela vem logo após a figura. */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#141618);--paper:light-dark(#f7f7f5,#1b1e21);--ink:light-dark(#111111,#ececea);--mute:light-dark(#5a5f66,#a2a8b0);
+--line:light-dark(#cfd3d8,#353a40);--faint:light-dark(#eceef0,#23272b);--accent:light-dark(#0b4f8a,#8fc2f0);
+--ver:light-dark(#009E73,#1FA67C);--tri:light-dark(#0072B2,#3B93D0);--fd:light-dark(#D55E00,#E8692B);--ghost:light-dark(#8b9096,#6c737b);
+--band:light-dark(#11111110,#ffffff12);--warnbg:light-dark(#fff5e6,#2b2213);--warn:light-dark(#8a4b00,#ffc277);--okbg:light-dark(#e9f6f0,#142a20);--badbg:light-dark(#fcebe4,#2d1a12)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "STIX Two Text",Cambria,Georgia,serif;overflow-x:clip;font-variant-numeric:lining-nums tabular-nums}
+.ui,button,input,select,textarea,nav,.seg,.tag,.small,label,.kicker{font-family:"IBM Plex Sans","Segoe UI",Arial,sans-serif}
+h1{font-size:clamp(30px,4.2vw,46px);line-height:1.08;margin:6px 0 4px;font-weight:600;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:30px;line-height:1.15;margin:0 0 6px;font-weight:600;text-wrap:balance}
+h3{font-size:21px;line-height:1.25;margin:0 0 8px;font-weight:600}
+p{margin:0 0 10px;max-width:72ch}
+i.v,.v{font-style:italic}
+.mute{color:var(--mute)}.small{font-size:14px}
+.kicker{font-size:14px;color:var(--mute);margin:0}
+header{padding:26px max(5vw,16px) 0;border-bottom:1px solid var(--ink)}
+.lede{font-style:italic;color:var(--mute);margin:0 0 16px;font-size:19px;max-width:none}
+nav{display:flex;gap:2px;flex-wrap:wrap}
+nav a{padding:12px 16px;text-decoration:none;color:var(--mute);border-bottom:3px solid transparent;font-weight:500;font-size:15px}
+nav a[aria-current=page]{color:var(--ink);border-color:var(--ink)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+main{padding:28px max(5vw,16px) 56px;max-width:1360px;margin:0 auto}
+section[data-view]{display:none}section[data-view].on{display:block}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;margin:4px 0 18px}
+.toolbar .lab{font-size:13px;color:var(--mute);margin-right:2px}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--ink);border-radius:6px;overflow:hidden}
+.seg button{font-size:15px;padding:9px 14px;min-height:44px;border:0;border-right:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.btn{font-size:15px;padding:9px 14px;min-height:44px;border-radius:6px;border:1px solid var(--ink);background:var(--bg);color:var(--ink);cursor:pointer}
+.btn.pri{background:var(--ink);color:var(--bg)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:28px;align-items:start}
+@media(max-width:900px){.layout{display:flex;flex-direction:column;align-items:stretch}.layout>.left{display:contents}.o1{order:1}.o2{order:2}.layout>.side{order:3}.o4{order:4}}
+figure{margin:0}
+.fig{position:relative;min-height:420px;background:var(--bg)}
+.fig.sm{min-height:270px}
+.fig>svg{position:absolute;inset:0;width:100%;height:100%;touch-action:none;overflow:visible}
+.fig:focus-visible{outline-offset:4px}
+figcaption{font-size:15.5px;line-height:1.5;margin-top:8px;color:var(--ink)}
+figcaption b{font-weight:600}
+.key{display:flex;flex-wrap:wrap;gap:6px 18px;margin:8px 0 0;font:14px "IBM Plex Sans",Arial,sans-serif;color:var(--ink)}
+.key>span{display:inline-flex;align-items:center;gap:6px}.key svg{width:36px;height:12px;flex:none}
+.readout{position:absolute;pointer-events:none;background:var(--bg);border:1px solid var(--ink);padding:6px 9px;font:13px/1.45 "IBM Plex Sans",Arial,sans-serif;display:none;white-space:nowrap;z-index:2}
+svg text{fill:var(--ink);font:13px "STIX Two Text",Georgia,serif}
+svg .tk{fill:var(--mute)}
+svg .axl{font-size:15px}
+svg .fr{fill:none;stroke:var(--ink);stroke-width:1}
+svg .tick{stroke:var(--ink);stroke-width:1}
+svg .gr{stroke:var(--faint);stroke-width:1}
+svg .rl{stroke:var(--ghost);stroke-width:1;stroke-dasharray:2 3}
+svg .lbl{paint-order:stroke;stroke:var(--bg);stroke-width:4px;stroke-linejoin:round;font-size:13.5px}
+svg .an{stroke:var(--mute);fill:none;stroke-width:1.2}
+svg .an.hi{stroke:var(--ink);stroke-width:2}
+svg .anl{fill:var(--mute)}svg .anl.hi{fill:var(--ink);font-weight:600}
+svg .bandr{fill:var(--band)}svg .bandr.hi{fill:light-dark(#11111122,#ffffff26)}
+.ptab{width:100%;border-collapse:collapse;font-size:16px}
+.ptab caption{text-align:left;font-size:15.5px;margin-bottom:6px;caption-side:top}
+.ptab th{font:600 13px "IBM Plex Sans",Arial,sans-serif;color:var(--mute);text-align:left;border-bottom:1px solid var(--ink);border-top:2px solid var(--ink);padding:6px 6px}
+.ptab td{padding:8px 6px 2px;vertical-align:baseline}
+.ptab tr.sl td{padding:0 6px 10px;border-bottom:1px solid var(--line)}
+.ptab tr.pr.hi td,.ptab tr.sl.hi td{background:var(--faint)}
+.ptab .sym{font-size:19px;font-style:italic;width:44px;white-space:nowrap}
+.ptab .unit{color:var(--mute);font-size:14px;white-space:nowrap;font-family:"IBM Plex Sans",Arial,sans-serif}
+.ptab input[type=text]{width:96px;font:16px "IBM Plex Sans",Arial,sans-serif;padding:7px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);text-align:right}
+.ptab input[type=range]{width:100%;height:32px;accent-color:var(--ink)}
+.ptab tr.locked input{opacity:.55}
+@media(max-width:600px){.ptab{font-size:15px}.ptab .unit{white-space:normal;font-size:13px}.ptab input[type=number]{width:78px}.ptab .sym{width:34px;font-size:17px}.ptab th,.ptab td{padding-left:3px;padding-right:3px}}
+.lock{font:500 11px "IBM Plex Sans",Arial,sans-serif;padding:1px 7px;border:1px solid var(--line);border-radius:999px;color:var(--mute);margin-left:4px;font-style:normal}
+.dtab{width:100%;border-collapse:collapse;font-size:16px;margin-top:22px}
+.dtab caption{text-align:left;font-size:15.5px;margin-bottom:6px}
+.dtab th{font:600 13px "IBM Plex Sans",Arial,sans-serif;color:var(--mute);text-align:left;border-bottom:1px solid var(--ink);border-top:2px solid var(--ink);padding:6px}
+.dtab td{padding:6px;border-bottom:1px solid var(--line)}.dtab tr:last-child td{border-bottom:1px solid var(--ink)}
+.dtab td.n{text-align:right;white-space:nowrap}
+.eqbox{margin:18px 0 6px;padding:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow-x:auto;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px}
+.eqbox .eqn{font-size:19px;min-height:40px;display:flex;align-items:center;justify-content:safe center;overflow-x:auto;max-width:100%}
+.eqbox .eqn mjx-container{margin:0!important;max-width:100%;overflow-x:auto;overflow-y:hidden}
+.eqbox .no{color:var(--mute);font-size:16px}
+.note{margin:14px 0;font-size:16px;padding:0 0 0 14px;border-left:2px solid var(--ink)}
+.note .h{font:600 13px "IBM Plex Sans",Arial,sans-serif;color:var(--mute);display:block;margin-bottom:2px}
+.note:empty{display:none}
+.alert{border-left:3px solid var(--warn);background:var(--warnbg);padding:8px 12px;margin:10px 0;font:15px "IBM Plex Sans",Arial,sans-serif}
+.alert:empty{display:none}
+.opts-row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:12px 0 0;font:15px "IBM Plex Sans",Arial,sans-serif}
+.opts-row label{display:inline-flex;gap:6px;align-items:center;min-height:32px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:minmax(0,1fr)}}
+table.art{border-collapse:collapse;width:100%;font-size:16px}
+table.art caption{text-align:left;font-size:15.5px;margin-bottom:6px}
+table.art th{font:600 13px "IBM Plex Sans",Arial,sans-serif;color:var(--mute);text-align:left;border-bottom:1px solid var(--ink);border-top:2px solid var(--ink);padding:7px 9px}
+table.art td{padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+table.art tr:last-child td{border-bottom:1px solid var(--ink)}
+.scroll{overflow-x:auto}
+details{margin:12px 0;font:15px "IBM Plex Sans",Arial,sans-serif}summary{cursor:pointer;font-weight:500;min-height:32px}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 16px}
+.steps button{font-size:14px;padding:8px 12px;min-height:44px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.steps button[aria-current=step]{border-color:var(--ink);box-shadow:inset 0 -3px 0 var(--ink)}
+.steps button.done::after{content:" ✓";color:var(--ver)}
+.paper{max-width:820px}
+.opts{display:grid;gap:8px;margin:10px 0}
+.opts button{text-align:left;font-size:16px;padding:10px 12px;min-height:44px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);cursor:pointer}
+.opts button.right{background:var(--okbg);border-color:var(--ver)}
+.opts button.wrong{background:var(--badbg);border-color:var(--fd)}
+.fb{padding:10px 12px;margin:8px 0;background:var(--paper);border-left:2px solid var(--ink)}
+.fb:empty{display:none}
+.phase{font:600 13px "IBM Plex Sans",Arial,sans-serif;color:var(--mute);margin:18px 0 4px}
+.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--mute);margin-right:4px}
+textarea{width:100%;min-height:200px;font:15px/1.5 "IBM Plex Sans",Arial,sans-serif;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.card{border-top:2px solid var(--ink);padding-top:12px}
+footer{border-top:1px solid var(--line);padding:10px max(5vw,16px);color:var(--mute);font:13px "IBM Plex Sans",Arial,sans-serif}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media(max-width:600px){.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0!important;padding:3px 0;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;font:600 13px "IBM Plex Sans",Arial,sans-serif;color:var(--mute)}.stack td:empty{display:none}}
+@media(prefers-reduced-motion:no-preference){svg .an,svg .anl,svg .bandr{transition:stroke .15s,fill .15s,stroke-width .15s}}
+/* ---------- modo tutorial ---------- */
+.tm-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:18px 0 10px}
+@media(max-width:900px){.tm-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.tm-grid{grid-template-columns:minmax(0,1fr)}}
+.tm-card{border:1px solid var(--line);border-top:3px solid var(--ink);padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.tm-card.off{opacity:.55;border-top-color:var(--line)}.tm-card.done{border-top-color:var(--ver)}
+.tm-card h3{margin:0;font-size:20px}.tm-card p{margin:0}.tm-n,.tm-s{font:13px "IBM Plex Sans",Arial,sans-serif;color:var(--mute)}
+.tm-card .btn{margin-top:8px;align-self:flex-start}.tm-tools{display:flex;gap:8px;flex-wrap:wrap}
+.tb-row{display:flex;flex-wrap:wrap;gap:10px}
+.tb{display:flex;flex-direction:column;border:1px dashed var(--line);border-radius:8px;padding:8px 12px;color:var(--mute);font:14px "IBM Plex Sans",Arial,sans-serif;min-width:170px}
+.tb.on{border:1px solid var(--ink);color:var(--ink);background:var(--paper)}.tb small{font-size:12px}
+ol.tn{padding-left:0;list-style:none;margin:0 0 10px}ol.tn li{padding:6px 0;border-bottom:1px solid var(--line);font-size:16px}
+.tn-id{font:600 12px "IBM Plex Sans",Arial,sans-serif;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--mute)}
+body.tut-on{padding-bottom:calc(var(--dock-h,220px) + 12px)}
+html:has(body.tut-on){scroll-padding-bottom:calc(var(--dock-h,220px) + 16px)}
+#tut-mask{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:40;display:none}
+#tut-mask .tm-dim{fill:light-dark(#0b0d1080,#00000099)}
+#tut-mask .tm-ring{fill:none;stroke:var(--accent);stroke-width:3}
+@media(prefers-reduced-motion:no-preference){#tut-mask .tm-ring{animation:tring 1.6s ease-in-out infinite}}
+@keyframes tring{50%{stroke-opacity:.35}}
+#tut-dock{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--bg);border-top:2px solid var(--ink);box-shadow:0 -6px 24px #0003;max-height:62vh;overflow:auto;font-size:16px}
+.td-head{display:flex;align-items:center;gap:12px;padding:8px max(3vw,12px);border-bottom:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.td-head #td-where{font-weight:600;flex:1 1 260px}
+.td-bar{flex:0 1 180px;height:6px;background:var(--faint);border-radius:9px;overflow:hidden}.td-bar i{display:block;height:100%;background:var(--ink);width:0;transition:width .3s}
+.btn.sm{min-height:36px;padding:6px 10px;font-size:14px}
+.td-body{display:flex;gap:14px;padding:12px max(3vw,12px) 14px;max-width:1100px}
+.td-av{flex:none;width:44px;height:44px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:600}
+.td-main{flex:1}.td-who{margin:0;font-size:13px;color:var(--mute)}
+#td-msg{font:17px/1.5 "STIX Two Text",Georgia,serif;margin:2px 0 8px;max-width:80ch}
+#td-msg>span{display:block;margin-top:6px;font:14px/1.45 "IBM Plex Sans",Arial,sans-serif}
+.td-k{display:inline-block!important;font:600 12px "IBM Plex Sans",Arial,sans-serif!important;color:var(--mute);margin:0 8px 0 0!important;text-transform:none}
+.td-bet{color:var(--mute)}.td-note{color:var(--ink)}.td-badge{color:var(--ver);font-weight:600}
+.td-opts,.td-btns,.td-row{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin:6px 0}
+.td-sel{display:inline-flex;flex-direction:column;gap:4px;font-size:14px}
+.td-sel input,.td-sel select{font:16px "IBM Plex Sans",Arial,sans-serif;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);min-width:140px}
+.td-hint{background:var(--paper);border-left:3px solid var(--accent);padding:6px 10px;margin:6px 0}
+.td-fb{background:var(--warnbg);padding:6px 10px;margin:6px 0}
+.td-live{font-size:16px}.td-alt summary{font-size:14px;color:var(--mute)}
+ol.td-stm{margin:6px 0;padding-left:22px}ol.td-stm li{margin:0 0 10px}ol.td-stm small{display:block;color:var(--mute);margin-top:2px}
+.td-g{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.td-g button{font-size:13px;padding:6px 10px;min-height:36px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);cursor:pointer}
+.td-g button[aria-pressed=true]{background:var(--ink);color:var(--bg)}.td-g button.ok{outline:3px solid var(--ver)}.td-g button.no{outline:3px solid var(--fd)}
+.td-opts .btn.no{border-color:var(--fd)}
+#tut-drawer{position:fixed;top:0;right:0;bottom:var(--dock-h,0);width:min(420px,100vw);z-index:55;background:var(--bg);border-left:2px solid var(--ink);overflow:auto;box-shadow:-6px 0 24px #0003}
+#tut-drawer .tn-list{padding:10px 16px}
+.tut-locked{opacity:.3;filter:grayscale(1)}
+body.tut-noparams #sim-ctl,body.tut-noparams #sim-kv,body.tut-noparams .eqbox,body.tut-noparams #sim-cap,body.tut-noparams #sim-explain,body.tut-noparams #sim-limit,body.tut-noparams #sim-table{visibility:hidden}
+
+
+/* ---------- v2.2: interface enxuta ---------- */
+header{padding:0 max(5vw,16px)}
+.hbar{display:flex;align-items:center;gap:6px 28px;flex-wrap:wrap}
+h1.brand{font-size:20px;margin:0;padding:12px 0;letter-spacing:0}
+nav{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}nav a{white-space:nowrap}
+main{padding-top:18px}
+.kicker{margin-top:4px}.lede{margin-bottom:10px}
+.figbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 0}
+.figbar label{display:inline-flex;gap:6px;align-items:center;min-height:36px;margin-right:6px;font-size:15px}
+.linkbox{font:13px "IBM Plex Sans",Arial,sans-serif;width:min(420px,70vw);padding:4px 6px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink)}
+details.more{margin:14px 0;border-top:1px solid var(--line);padding-top:6px}
+details.more>summary{font:500 15px "IBM Plex Sans",Arial,sans-serif;color:var(--ink);padding:6px 0}
+details.more[open]>summary{margin-bottom:8px}
+#sim-more .dtab{margin-top:10px}
+.ptab td{padding:7px 4px;vertical-align:middle;border-bottom:1px solid var(--line)}
+.ptab .sym{width:30px}
+.ptab .ctlc label{display:block;font:13.5px/1.3 "IBM Plex Sans",Arial,sans-serif;color:var(--mute)}
+.ptab .ctlc input[type=range]{height:26px;margin:2px 0 0}
+.ptab .valc{width:92px;text-align:right}
+.ptab .valc input{width:84px}
+.ptab .unit{width:84px;font-size:13px;white-space:normal}
+.ptab tr.locked input[type=range]{display:none}
+.ptab caption{margin-bottom:4px}
+#c3-adv .toolbar{margin:6px 0 10px}#c3-adv .btn{margin-top:8px}
+.tm-card.off{opacity:1;border-top-color:var(--line);background:var(--paper)}
+.tm-card.off h3,.tm-card.off p{color:var(--mute)}
+/* ---------- v2.4: leitura em x ---------- */
+.probe{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--mute)}
+.probe input{width:76px;min-height:34px;padding:4px 8px;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;text-align:right}
+.readout .rtag{color:var(--mute);font-weight:400}
+/* ---------- v2.3: camadas de leitura ---------- */
+.layers{display:flex;flex-wrap:wrap;gap:2px 16px;align-items:center;margin:8px 0 0;padding-top:6px;border-top:1px solid var(--line)}
+.layers>.lab,.lay-opt .lab{font-size:13px;color:var(--mute)}
+.layers label{display:inline-flex;gap:6px;align-items:center;min-height:36px;font-size:15px}
+.lay-opt{flex-basis:100%;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:2px 0}
+.lay-opt[hidden],.lay-note[hidden]{display:none}
+.seg.sm button{min-height:34px;padding:5px 12px;font-size:14px}
+.lay-note{flex-basis:100%;margin:6px 0 2px;max-width:none;line-height:1.5}
+svg .fl{fill:var(--mute);font-size:12.5px}svg .fl.st{fill:var(--ink);font-weight:600}
+svg .morphlbl{font:600 13px "IBM Plex Sans",Arial,sans-serif;fill:var(--mute)}
+@media(max-width:600px){
+  .seg{flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:thin}.seg button{flex:none}
+  .toolbar{gap:8px}.toolbar>span{max-width:100%;display:flex;flex-direction:column;gap:2px}
+  .fig{min-height:320px}
+  #tut-dock{max-height:42vh}
+  .ptab .unit{width:64px}
+}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header>
+  <div class="hbar"><h1 class="brand">Laboratório de Modelos Logísticos</h1>
+  <nav aria-label="Módulos"><a href="#aprender">Aprender</a><a href="#simular">Simular</a><a href="#comparar">Comparar</a><a href="#planejar">Planejar</a></nav></div>
+</header>
+<main>
+
+<!-- ============================== SIMULAR ============================== -->
+<section data-view="simular" aria-labelledby="h-sim">
+  <h2 id="h-sim" class="sr">Simular</h2>
+  <div class="toolbar ui">
+    <span><span class="lab">Modelo</span> <span class="seg" role="group" aria-label="Modelo" id="sim-model"></span></span>
+    <span><span class="lab">Representação</span> <span class="seg" role="group" aria-label="Representação" id="sim-rep"></span></span>
+  </div>
+  <div class="layout">
+    <div class="left">
+      <figure class="o1">
+        <div class="fig" id="sim-fig" role="img" tabindex="0" aria-label="Gráfico do modelo selecionado"><svg></svg><div class="readout"></div></div>
+        <div class="key" id="sim-legend"></div>
+        <figcaption id="sim-cap"></figcaption>
+      </figure>
+      <div class="figbar ui o1">
+        <label title="Com a geometria ligada, passe o cursor sobre um parâmetro da Tabela 1 para destacá-lo na figura"><input type="checkbox" id="sim-ann"> Geometria dos parâmetros</label>
+        <button class="btn sm" id="sim-pin" type="button">Fixar referência</button>
+        <button class="btn sm" id="sim-unpin" type="button">Limpar referência</button>
+        <button class="btn sm" id="sim-reset" type="button">Valores iniciais</button>
+        <label class="probe">Ler em <input id="sim-probe" type="text" inputmode="decimal" autocomplete="off" placeholder="x" aria-label="Ler a curva no ponto x (valor do eixo horizontal)"></label>
+        <button class="btn sm" id="sim-link" type="button">Copiar link</button>
+        <span class="small mute" id="sim-linkmsg" aria-live="polite"></span>
+      </div>
+      <div class="layers ui o1" id="sim-layers" role="group" aria-label="Camadas de leitura do gráfico">
+        <span class="lab">Camadas de leitura</span>
+        <label class="lay-adv" title="Curvas finas obtidas variando um parâmetro, com os demais fixos"><input type="checkbox" id="sim-fam"> Família de curvas</label>
+        <label class="lay-adv" title="O fenômeno por trás da curva: estudantes, estados quânticos ou populações simuladas"><input type="checkbox" id="sim-part"> Partículas</label>
+        <label title="A curva se transforma continuamente ao trocar de representação"><input type="checkbox" id="sim-anim"> Transição animada</label>
+        <div class="lay-opt lay-adv" id="sim-famopt" hidden><span class="lab">Variar</span> <span class="seg sm" role="group" aria-label="Parâmetro variado na família" id="sim-famk"></span></div>
+        <div class="lay-opt lay-adv" id="sim-partopt" hidden><span class="lab">Amostra</span> <span class="seg sm" role="group" aria-label="Tamanho da amostra simulada" id="sim-partn"></span> <button class="btn sm" id="sim-reroll" type="button">Sortear de novo</button></div>
+        <p class="small mute lay-note" id="sim-partnote" aria-live="polite" hidden></p>
+      </div>
+      <div class="eqbox o2"><div class="eqn" id="sim-eq" role="img"></div><span class="no">(1)</span></div>
+      <div class="note o2" id="sim-explain" aria-live="polite"></div>
+      <details class="more o4" id="sim-more"><summary>Mais detalhes: equação com valores, grandezas derivadas, limite do modelo e tabela de valores</summary>
+        <div class="eqbox"><div class="eqn" id="sim-eqn" role="img"></div><span class="no">(2)</span></div>
+        <table class="dtab" id="sim-kv"></table>
+        <div class="note" id="sim-limit"></div>
+        <p class="small mute" style="margin:14px 0 4px">Tabela de valores (alternativa textual à figura)</p><div class="scroll" id="sim-table"></div>
+      </details>
+    </div>
+    <div class="side">
+      <div id="sim-vmode"></div>
+      <div id="sim-ctl"></div>
+      <div class="alert" id="sim-alert" role="alert"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== COMPARAR ============================== -->
+<section data-view="comparar" aria-labelledby="h-cmp">
+  <h2 id="h-cmp" class="sr">Comparar</h2>
+  <div class="toolbar ui"><span class="seg" role="group" aria-label="Modo de comparação" id="cmp-mode"></span></div>
+
+  <div id="cmp-1">
+    <div class="grid3">
+      <figure><div class="fig sm" id="c1-v" role="img" tabindex="0" aria-label="Verhulst: população em função do tempo"><svg></svg><div class="readout"></div></div></figure>
+      <figure><div class="fig sm" id="c1-t" role="img" tabindex="0" aria-label="TRI: probabilidade de acerto em função da proficiência"><svg></svg><div class="readout"></div></div></figure>
+      <figure><div class="fig sm" id="c1-f" role="img" tabindex="0" aria-label="Fermi–Dirac: ocupação média em função da energia"><svg></svg><div class="readout"></div></div></figure>
+    </div>
+    <p style="margin-top:10px"><b>Figura 2.</b> Representação científica original. (a) Solução de Verhulst, <span id="c1-vp"></span>. (b) TRI 2PL, <span id="c1-tp"></span>. (c) Distribuição de Fermi–Dirac, <span id="c1-fp"></span>. A forma é semelhante, mas cada eixo mede uma grandeza diferente; a faixa sombreada marca a largura da transição de 10 % a 90 %. Parâmetros do módulo Simular.</p>
+  </div>
+
+  <div id="cmp-2">
+    <div class="layout">
+      <div class="left">
+        <figure class="o1"><div class="fig" id="c2" role="img" tabindex="0" aria-label="Três modelos normalizados sobre o argumento adimensional z"><svg></svg><div class="readout"></div></div>
+        <div class="key" id="c2-legend"></div>
+        <figcaption><b>Figura 3.</b> Os três modelos no argumento adimensional <i>z</i>. Após normalizar a grandeza vertical (<i>n</i> = <i>N</i>/<i>K</i>, <i>P</i>, <i>f</i>) e substituir a variável horizontal por <i>z</i>, os pontos calculados por cada modelo — com seus próprios parâmetros — caem sobre a mesma curva <i>L</i>(<i>z</i>) = 1/(1 + e<sup>−<i>z</i></sup>). A tangente em <i>z</i> = 0 tem inclinação 1/4.</figcaption></figure>
+      </div>
+      <div class="side">
+        <table class="dtab" id="c2-z" style="margin-top:0"></table>
+        <p class="note"><span class="h">Leitura crítica</span>A coincidência é uma igualdade matemática construída por normalização e mudança de variável. Ela não mostra que população, proficiência e ocupação quântica sejam a mesma grandeza.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="cmp-3">
+    <div class="toolbar ui">
+      <span><span class="lab">Correspondência</span> <span class="seg" role="group" aria-label="Correspondência" id="c3-mode"></span></span>
+    </div>
+    <div class="layout">
+      <div class="left">
+        <figure class="o1">
+          <div class="grid2">
+            <div><div class="fig" id="c3-a" role="img" tabindex="0" aria-label="Probabilidade da TRI e ocupação transformada em função da proficiência"><svg></svg><div class="readout"></div></div><div class="key" id="c3a-legend"></div></div>
+            <div><div class="fig" id="c3-b" role="img" tabindex="0" aria-label="Ocupação de Fermi–Dirac em função da energia"><svg></svg><div class="readout"></div></div><div class="key" id="c3b-legend"></div></div>
+          </div>
+          <figcaption id="c3-cap"></figcaption>
+        </figure>
+        <div class="eqbox o2"><div class="eqn" id="c3-eq" role="img"></div><span class="no">(3)</span></div>
+        <div class="alert o2" id="c3-alert" role="alert"></div>
+        <div class="note o4" id="c3-explain" aria-live="polite"></div>
+      </div>
+      <div class="side">
+        <div id="c3-ctl"></div>
+        <table class="dtab" id="c3-kv"></table>
+        <details class="more ui" id="c3-adv"><summary>Opções avançadas: modelo da TRI, sentido da edição e escala da transformação</summary>
+          <div class="toolbar"><span><span class="lab">Modelo da TRI</span> <span class="seg" role="group" aria-label="Modelo da TRI" id="c3-model"></span></span>
+          <span><span class="lab">Editar por</span> <span class="seg" role="group" aria-label="Editar por" id="c3-edit"></span></span></div>
+          <div id="c3-ctl2"></div>
+          <button class="btn sm" type="button" id="c3-l300">λ = k<sub>B</sub> · 300 K</button>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <details class="more" id="cmp-limits" style="margin-top:28px"><summary><b>Tabela 3.</b> Correspondência formal não é identidade científica — o que a analogia não autoriza</summary>
+  <div class="scroll"><table class="art stack">
+    <thead><tr><th>Aspecto</th><th>Verhulst</th><th>TRI</th><th>Fermi–Dirac</th></tr></thead>
+    <tbody>
+      <tr><td>Objeto representado</td><td>População</td><td>Resposta a um item</td><td>Ocupação de um estado quântico</td></tr>
+      <tr><td>Variável horizontal</td><td>Tempo <i>t</i></td><td>Proficiência latente <i>θ</i></td><td>Energia <i>E</i></td></tr>
+      <tr><td>Hipótese central</td><td>Crescimento per capita que diminui linearmente com <i>N</i>/<i>K</i></td><td>Modelo probabilístico de resposta condicionado aos parâmetros do item</td><td>Férmions não interagentes em equilíbrio; exclusão de Pauli</td></tr>
+      <tr><td>Limite superior</td><td>Capacidade de suporte <i>K</i></td><td>Probabilidade máxima de acerto (1)</td><td>Ocupação máxima de um estado (1)</td></tr>
+      <tr><td>Origem da forma logística</td><td>Solução de uma equação diferencial fenomenológica</td><td>Escolha de modelagem psicométrica</td><td>Ensemble grande-canônico de um estado binário</td></tr>
+      <tr><td>O que não se transfere</td><td>Tempo não é proficiência</td><td>A “temperatura” associada a <i>a</i> não é temperatura física</td><td>Não há “vagas” de aprendizagem nem dinâmica temporal</td></tr>
+    </tbody>
+  </table></div></details>
+</section>
+
+<!-- ============================== APRENDER ============================== -->
+<section data-view="aprender" aria-labelledby="h-apr">
+  <p class="kicker">Projeto-Matriz · Etapa 5 · Formação interdisciplinar de professores</p>
+  <p class="lede">Uma mesma curva, diferentes fenômenos: Verhulst, Teoria de Resposta ao Item e Fermi–Dirac</p>
+  <h2 id="h-apr">Aprender — modo tutorial</h2>
+  <p class="paper">Seis fases curtas ensinam a extrair as <b>seis leituras</b> de uma curva logística — teto e piso, centro, inclinação central, largura da transição, forma linearizada e limite da analogia. O tutor dá uma instrução por vez, você age no simulador real, e cada descoberta vai para o caderno de campo.</p>
+  <div class="tm-grid" id="tut-map"></div>
+  <div class="ui tm-tools"><button class="btn" type="button" id="tut-all">Liberar todas as fases (modo professor)</button><button class="btn" type="button" id="tut-reset">Reiniciar progresso</button></div>
+  <h3 style="margin-top:28px">Insígnias</h3>
+  <div class="tb-row" id="tut-badges"></div>
+  <h3 style="margin-top:28px">Caderno de campo</h3>
+  <div class="paper" id="tut-notes"></div>
+  <label for="tut-free" class="small mute">Anotações livres</label>
+  <textarea id="tut-free" class="paper" style="min-height:100px"></textarea>
+  <div class="ui" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn pri" type="button" id="tut-copy">Copiar caderno</button><span class="small mute" id="tut-status" aria-live="polite"></span></div>
+  <details id="free-mode" style="margin-top:32px"><summary><b>Modo livre</b> — as 8 atividades investigativas, sem guia</summary>
+    <div class="toolbar ui"><span class="seg" role="group" aria-label="Nível" id="apr-level"></span></div>
+    <div class="steps ui" id="apr-steps" aria-label="Atividades"></div>
+    <article class="card paper" id="apr-card" aria-live="polite"></article>
+  </details>
+</section>
+
+<!-- ============================== PLANEJAR ============================== -->
+<section data-view="planejar" aria-labelledby="h-pln">
+  <h2 id="h-pln">Planejar</h2>
+  <p class="mute">Roteiros-modelo para adaptar à sua turma. Edite, copie e leve para o seu planejamento. O rascunho fica salvo apenas neste navegador.</p>
+  <div class="toolbar ui"><span class="seg" role="group" aria-label="Roteiro" id="pln-pick"></span></div>
+  <div class="layout">
+    <article class="card" id="pln-card"></article>
+    <div class="side card">
+      <h3>Sua adaptação</h3>
+      <label for="pln-text" class="small mute">Texto editável do roteiro</label>
+      <textarea id="pln-text"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px" class="ui">
+        <button class="btn pri" type="button" id="pln-copy">Copiar roteiro</button>
+        <button class="btn" type="button" id="pln-restore">Restaurar modelo</button>
+      </div>
+      <p class="small mute" id="pln-status" aria-live="polite"></p>
+    </div>
+  </div>
+</section>
+</main>
+
+<svg id="tut-mask" aria-hidden="true"></svg>
+<div id="tut-dock" class="ui" role="region" aria-label="Tutor do laboratório" hidden>
+  <div class="td-head"><span id="td-where"></span><span class="td-bar" role="progressbar" aria-label="Progresso da fase" aria-valuemin="0" aria-valuemax="100"><i id="td-prog"></i></span><button class="btn sm" type="button" id="td-notes">Caderno</button><button class="btn sm" type="button" id="td-exit" aria-label="Sair do tutorial">Sair</button></div>
+  <div class="td-body"><div class="td-av" aria-hidden="true">PG</div><div class="td-main"><p class="td-who">Prof. Gelado</p><div id="td-msg" aria-live="polite"></div><div id="td-act"></div></div></div>
+</div>
+<aside id="tut-drawer" class="ui" aria-label="Caderno de campo" hidden><div class="td-head"><b>Caderno de campo</b><button class="btn sm tn-close" type="button">Fechar</button></div><div class="tn-list"></div></aside>
+<footer>Versão 2.4 · Prof. Gelado · Nenhum dado pessoal é coletado<span id="ver" hidden></span></footer>
+
+<script>
+/*
+ * Laboratório Interdisciplinar de Modelos Logísticos — Núcleo matemático 1.0
+ * Projeto-Matriz · Etapa 5 (implementação Claude)
+ *
+ * Referência: Caderno Matemático (Etapa 3) e Especificação Técnica (Etapa 4).
+ * Função geral: Y(x) = A + B·L[s(x − x0)], com L(z) = 1/(1 + e^(−z)).
+ *
+ * Convenções adotadas
+ *  - TRI com D = 1 (pode ser alterado explicitamente no parâmetro D).
+ *  - Energias em eV; k_B = 8,617333262e−5 eV/K (CODATA 2018, valor exato derivado).
+ *  - Todo argumento de exponencial é adimensional.
+ *  - Nenhuma entrada inválida é truncada silenciosamente: o núcleo lança RangeError.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.LogiCore = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  const KB_EV = 8.617333262e-5;   // eV/K
+  const KB_J = 1.380649e-23;      // J/K (exato, SI 2019)
+  const EV_J = 1.602176634e-19;   // J/eV (exato, SI 2019)
+  const VERSION = '1.0.0'; // núcleo inalterado desde a Etapa 5
+
+  // ---------------------------------------------------------------- validação
+  function num(x, nome) {
+    if (typeof x !== 'number' || !Number.isFinite(x)) {
+      throw new RangeError(`${nome} deve ser um número finito (recebido: ${x}).`);
+    }
+    return x;
+  }
+  function pos(x, nome) {
+    num(x, nome);
+    if (!(x > 0)) throw new RangeError(`${nome} deve ser estritamente positivo (recebido: ${x}).`);
+    return x;
+  }
+  function inOpen01(p, nome) {
+    num(p, nome);
+    if (!(p > 0 && p < 1)) throw new RangeError(`${nome} deve estar no intervalo aberto (0, 1); o logit de 0 ou 1 não é finito (recebido: ${p}).`);
+    return p;
+  }
+  function guessing(c) {
+    num(c, 'c');
+    if (!(c >= 0 && c < 1)) throw new RangeError(`c (assíntota inferior do 3PL) deve satisfazer 0 ≤ c < 1 (recebido: ${c}).`);
+    return c;
+  }
+
+  // ------------------------------------------------------- função logística
+  /** L(z) = 1/(1+e^(−z)), numericamente estável para |z| grande. */
+  function logistic(z) {
+    num(z, 'z');
+    if (z >= 0) return 1 / (1 + Math.exp(-z));
+    const e = Math.exp(z);
+    return e / (1 + e);
+  }
+  /** L'(z) = L(z)·L(−z) = L(z)[1 − L(z)], sem cancelamento catastrófico. */
+  function dlogistic(z) {
+    num(z, 'z');
+    const a = Math.abs(z);
+    const e = Math.exp(-a);
+    return e / ((1 + e) * (1 + e));
+  }
+  /** L''(z) = L'(z)[1 − 2L(z)]. */
+  function d2logistic(z) {
+    return dlogistic(z) * (1 - 2 * logistic(z));
+  }
+  /** logit(p) = ln[p/(1 − p)], definido apenas em 0 < p < 1. */
+  function logit(p) {
+    inOpen01(p, 'p');
+    return Math.log(p) - Math.log1p(-p);
+  }
+  /** Função geral Y(x) = A + B·L[s(x − x0)]. */
+  function general(x, { A = 0, B = 1, s = 1, x0 = 0 } = {}) {
+    num(x, 'x'); num(A, 'A'); pos(B, 'B'); num(s, 's'); num(x0, 'x0');
+    if (s === 0) throw new RangeError('s não pode ser zero.');
+    return A + B * logistic(s * (x - x0));
+  }
+
+  // ---------------------------------------------------------------- Verhulst
+  const verhulst = {
+    /** Instante central a partir da condição inicial: t0 = (1/r)·ln[(K − N0)/N0]. */
+    t0FromN0(K, r, N0) {
+      pos(K, 'K'); pos(r, 'r'); pos(N0, 'N0');
+      if (!(N0 < K)) throw new RangeError('No ramo sigmoidal crescente, 0 < N0 < K.');
+      return Math.log((K - N0) / N0) / r;
+    },
+    /** N(t) = K·L[r(t − t0)]. */
+    N(t, { K, r, t0 }) {
+      num(t, 't'); pos(K, 'K'); pos(r, 'r'); num(t0, 't0');
+      return K * logistic(r * (t - t0));
+    },
+    /** Fração da capacidade de suporte n = N/K. */
+    n(t, { K, r, t0 }) {
+      pos(K, 'K');
+      return verhulst.N(t, { K, r, t0 }) / K;
+    },
+    /** dN/dt = rN(1 − N/K) = rK·L'[r(t − t0)]. */
+    dNdt(t, { K, r, t0 }) {
+      num(t, 't'); pos(K, 'K'); pos(r, 'r'); num(t0, 't0');
+      return r * K * dlogistic(r * (t - t0));
+    },
+    /** d²N/dt² = r²K·L''. */
+    d2Ndt2(t, { K, r, t0 }) {
+      num(t, 't'); pos(K, 'K'); pos(r, 'r'); num(t0, 't0');
+      return r * r * K * d2logistic(r * (t - t0));
+    },
+    /** Argumento adimensional z_V = r(t − t0). */
+    z(t, { r, t0 }) { num(t, 't'); pos(r, 'r'); num(t0, 't0'); return r * (t - t0); },
+    centralSlope({ K, r }) { pos(K, 'K'); pos(r, 'r'); return r * K / 4; },
+    /** Inversa: tempo em que a população atinge N (0 < N < K). */
+    tAt(N, { K, r, t0 }) {
+      pos(K, 'K'); pos(r, 'r'); num(t0, 't0');
+      return t0 + logit(N / K) / r;
+    },
+  };
+
+  // --------------------------------------------------------------------- TRI
+  function irtCheck({ a = 1, b = 0, c = 0, D = 1 }) {
+    pos(a, 'a'); num(b, 'b'); guessing(c); pos(D, 'D');
+    return { a, b, c, D };
+  }
+  const irt = {
+    /** P(θ) = c + (1 − c)·L[D·a(θ − b)]. Rasch: a=1, c=0; 2PL: c=0. */
+    P(theta, params = {}) {
+      num(theta, 'θ');
+      const { a, b, c, D } = irtCheck(params);
+      return c + (1 - c) * logistic(D * a * (theta - b));
+    },
+    /** Probabilidade normalizada q = (P − c)/(1 − c) = L[D·a(θ − b)]. */
+    q(theta, params = {}) {
+      num(theta, 'θ');
+      const { a, b, D } = irtCheck(params);
+      return logistic(D * a * (theta - b));
+    },
+    /** dP/dθ = (1 − c)·D·a·L'[D·a(θ − b)]. */
+    dP(theta, params = {}) {
+      num(theta, 'θ');
+      const { a, b, c, D } = irtCheck(params);
+      return (1 - c) * D * a * dlogistic(D * a * (theta - b));
+    },
+    z(theta, params = {}) {
+      num(theta, 'θ');
+      const { a, b, D } = irtCheck(params);
+      return D * a * (theta - b);
+    },
+    /** Probabilidade no ponto θ = b: (1 + c)/2. */
+    Pcenter(params = {}) { const { c } = irtCheck(params); return (1 + c) / 2; },
+    /** Inclinação central (1 − c)·D·a/4. */
+    centralSlope(params = {}) { const { a, c, D } = irtCheck(params); return (1 - c) * D * a / 4; },
+    /** Informação de Fisher do item: I = (D·a)²·(P − c)²(1 − P)/[(1 − c)²·P]. Para c = 0: (Da)²P(1−P). */
+    info(theta, params = {}) {
+      num(theta, 'θ');
+      const { a, b, c, D } = irtCheck(params);
+      const Da = D * a;
+      const z = Da * (theta - b);
+      if (c === 0) return Da * Da * dlogistic(z);
+      const P = c + (1 - c) * logistic(z);
+      return Da * Da * ((P - c) ** 2) * (1 - P) / (((1 - c) ** 2) * P);
+    },
+    /** Proficiência para a qual P = p (c < p < 1). */
+    thetaAt(p, params = {}) {
+      const { a, b, c, D } = irtCheck(params);
+      num(p, 'p');
+      if (!(p > c && p < 1)) throw new RangeError(`No 3PL, p deve satisfazer c < p < 1 (c = ${c}).`);
+      return b + logit((p - c) / (1 - c)) / (D * a);
+    },
+  };
+
+  // -------------------------------------------------------------- Fermi–Dirac
+  function fdCheck({ mu, T, kB = KB_EV }) {
+    num(mu, 'μ'); pos(kB, 'k_B');
+    num(T, 'T');
+    if (!(T > 0)) throw new RangeError('A expressão de Fermi–Dirac exige T > 0. Para T → 0⁺ use fermi.limitT0.');
+    return { mu, T, kB };
+  }
+  const fermi = {
+    /** f(E) = 1/(1 + e^((E − μ)/(k_B T))) = L[(μ − E)/(k_B T)]. */
+    f(E, params) {
+      num(E, 'E');
+      const { mu, T, kB } = fdCheck(params);
+      return logistic((mu - E) / (kB * T));
+    },
+    z(E, params) {
+      num(E, 'E');
+      const { mu, T, kB } = fdCheck(params);
+      return (mu - E) / (kB * T);
+    },
+    /** df/dE = −f(1 − f)/(k_B T). */
+    dfdE(E, params) {
+      num(E, 'E');
+      const { mu, T, kB } = fdCheck(params);
+      return -dlogistic((mu - E) / (kB * T)) / (kB * T);
+    },
+    /** ∂f/∂μ = f(1 − f)/(k_B T). */
+    dfdmu(E, params) { return -fermi.dfdE(E, params); },
+    /** ∂f/∂T = (E − μ)/(k_B T²)·f(1 − f). */
+    dfdT(E, params) {
+      num(E, 'E');
+      const { mu, T, kB } = fdCheck(params);
+      return (E - mu) / (kB * T * T) * dlogistic((mu - E) / (kB * T));
+    },
+    centralSlope(params) { const { T, kB } = fdCheck(params); return -1 / (4 * kB * T); },
+    /** Limite T → 0⁺ com μ → μ0: degrau (1 para E < μ0; 0 para E > μ0; indefinido na fronteira). */
+    limitT0(E, mu0) {
+      num(E, 'E'); num(mu0, 'μ0');
+      if (E < mu0) return 1;
+      if (E > mu0) return 0;
+      return NaN; // valor na fronteira depende de como o limite é tomado
+    },
+    /** Energia em que f = p. */
+    EAt(p, params) {
+      const { mu, T, kB } = fdCheck(params);
+      return mu - kB * T * logit(p);
+    },
+  };
+
+  // ------------------------------------------------- sincronização TRI ↔ FD
+  /*
+   * Correspondência direta:       E = E0 − λθ,  μ = E0 − λb,  T = λ/(a·D·k_B)  ⇒ f(E(θ)) = q(θ)
+   * Correspondência complementar: E = E0 + λθ,  μ = E0 + λb,  T = λ/(a·D·k_B)  ⇒ f(E(θ)) = 1 − q(θ)
+   * (Para Rasch/2PL, q = P. No 3PL, P = c + (1 − c)·f na direta.)
+   * λ: energia por unidade de proficiência (eV), λ > 0. E0: referência de energia (eV).
+   */
+  function syncCheck(mode, E0, lambda, kB) {
+    if (mode !== 'direta' && mode !== 'complementar') throw new RangeError("O modo deve ser 'direta' ou 'complementar'.");
+    num(E0, 'E0'); pos(lambda, 'λ'); pos(kB, 'k_B');
+  }
+  const sync = {
+    sign(mode) { return mode === 'direta' ? -1 : 1; },
+    /** TRI → Fermi–Dirac. */
+    toFermi({ a = 1, b = 0, D = 1 }, { mode = 'direta', E0, lambda, kB = KB_EV }) {
+      syncCheck(mode, E0, lambda, kB); pos(a, 'a'); num(b, 'b'); pos(D, 'D');
+      const s = sync.sign(mode);
+      return { mu: E0 + s * lambda * b, T: lambda / (a * D * kB) };
+    },
+    /** Fermi–Dirac → TRI. */
+    toIRT({ mu, T }, { mode = 'direta', E0, lambda, kB = KB_EV, D = 1 }) {
+      syncCheck(mode, E0, lambda, kB); num(mu, 'μ'); pos(T, 'T'); pos(D, 'D');
+      const s = sync.sign(mode);
+      return { a: lambda / (D * kB * T), b: (mu - E0) / (s * lambda) };
+    },
+    /** Energia associada à proficiência θ. */
+    energy(theta, { mode = 'direta', E0, lambda, kB = KB_EV }) {
+      syncCheck(mode, E0, lambda, kB); num(theta, 'θ');
+      return E0 + sync.sign(mode) * lambda * theta;
+    },
+    /** Proficiência associada à energia E. */
+    theta(E, { mode = 'direta', E0, lambda, kB = KB_EV }) {
+      syncCheck(mode, E0, lambda, kB); num(E, 'E');
+      return (E - E0) / (sync.sign(mode) * lambda);
+    },
+    /** λ necessário para que a discriminação a corresponda à temperatura T: λ = a·D·k_B·T. */
+    lambdaFor(a, T, { D = 1, kB = KB_EV } = {}) { pos(a, 'a'); pos(T, 'T'); pos(D, 'D'); return a * D * kB * T; },
+  };
+
+  // ----------------------------------------- Verhulst ↔ TRI ↔ FD (formal)
+  const formal = {
+    /** t(θ) = t0 + (a/r)(θ − b): n(t(θ)) = P(θ) para Rasch/2PL. */
+    tFromTheta(theta, { a = 1, b = 0, D = 1 }, { r, t0 }) {
+      num(theta, 'θ'); pos(a, 'a'); num(b, 'b'); pos(r, 'r'); num(t0, 't0');
+      return t0 + (D * a / r) * (theta - b);
+    },
+    /** E(t) = μ − k_B·T·r(t − t0): f(E(t)) = n(t). */
+    EFromT(t, { r, t0 }, { mu, T, kB = KB_EV }) {
+      num(t, 't'); pos(r, 'r'); num(t0, 't0'); num(mu, 'μ'); pos(T, 'T');
+      return mu - kB * T * r * (t - t0);
+    },
+  };
+
+  // ------------------------------------------------------- utilidades
+  function linspace(a, b, n) {
+    num(a, 'a'); num(b, 'b');
+    if (!(Number.isInteger(n) && n >= 2)) throw new RangeError('n deve ser inteiro ≥ 2.');
+    const out = new Array(n);
+    for (let i = 0; i < n; i++) out[i] = a + (b - a) * i / (n - 1);
+    return out;
+  }
+  /** Entropia binária em nats: H(p) = −p ln p − (1 − p) ln(1 − p). */
+  function binaryEntropy(p) {
+    num(p, 'p');
+    if (p < 0 || p > 1) throw new RangeError('p deve estar em [0, 1].');
+    if (p === 0 || p === 1) return 0;
+    return -p * Math.log(p) - (1 - p) * Math.log1p(-p);
+  }
+
+  return {
+    VERSION, KB_EV, KB_J, EV_J,
+    logistic, dlogistic, d2logistic, logit, general,
+    verhulst, irt, fermi, sync, formal,
+    linspace, binaryEntropy,
+  };
+});
+
+</script>
+<script>
+{
+const C = window.LogiCore;
+const $ = s => document.querySelector(s);
+const NF = {};
+const fmt = (x, d = 3) => { if (!Number.isFinite(x)) return '—'; NF[d] ||= new Intl.NumberFormat('pt-BR', { maximumFractionDigits: d }); return NF[d].format(Math.abs(x) < 1e-12 ? 0 : x).replace('-', '−'); };
+const fmtT = (x, d = 3) => fmt(x, d).replace(/\./g, '§').replace(',', '{,}').replace(/§/g, '\\,').replace('−', '-');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const safe = f => x => { try { const y = f(x); return Number.isFinite(y) ? y : NaN; } catch (e) { return NaN; } };
+const V = s => `<i>${s}</i>`;
+const COL = { ver: 'var(--ver)', tri: 'var(--tri)', fd: 'var(--fd)', ghost: 'var(--ghost)', ink: 'var(--ink)' };
+const DASH = { ver: '', tri: '10 5', fd: '2.5 3.5', ghost: '6 5', ink: '' };
+const NAME = { ver: 'Verhulst', tri: 'TRI', fd: 'Fermi–Dirac' };
+const W1090 = 2 * Math.log(9); // largura 10–90 % em unidades de z: 2 ln 9 ≈ 4,394
+// ganchos para o modo tutorial: eventos de interação e reaplicação de bloqueios após cada renderização
+const emit = (type, d = {}) => { try { window.__TUTHOOK && window.__TUTHOOK(type, d); } catch (e) { console.error(e); } };
+const afterRender = () => { try { window.__TUTLOCK && window.__TUTLOCK(); } catch (e) { console.error(e); } };
+
+// ------------------------------------------------------- equações (MathJax)
+const EQS = new Map();
+function tex(id, src, fallback) {
+  EQS.set(id, [src, fallback]);
+  const el = document.getElementById(id); if (!el) return;
+  if (window.__mjReady && window.MathJax?.tex2svg) {
+    try { el.replaceChildren(MathJax.tex2svg(src, { display: true })); el.setAttribute('aria-label', fallback.replace(/<[^>]+>/g, '')); return; } catch (e) { }
+  }
+  el.innerHTML = fallback; el.setAttribute('aria-label', fallback.replace(/<[^>]+>/g, ''));
+}
+document.addEventListener('mathjax-ready', () => { try { document.head.appendChild(MathJax.svgStylesheet()); } catch (e) { } for (const [id, [s, f]] of EQS) tex(id, s, f); });
+
+// ------------------------------------------------------------------ figura
+function nice(span, n) { const raw = span / n, p = 10 ** Math.floor(Math.log10(raw)), m = raw / p; return (m < 1.5 ? 1 : m < 3 ? 2 : m < 7 ? 5 : 10) * p; }
+function ticks(a, b, n) { const s = nice(b - a, n), out = []; for (let v = Math.ceil(a / s - 1e-9) * s; v <= b + 1e-9 * s; v += s) out.push(+v.toPrecision(12)); return { v: out, s }; }
+function rich(s) { // <i>x</i>, <sub>0</sub>, <sup>-1</sup> → tspans
+  return s.replace(/<i>(.*?)<\/i>/g, '<tspan font-style="italic">$1</tspan>').replace(/<sub>(.*?)<\/sub>/g, '<tspan baseline-shift="sub" font-size="75%">$1</tspan>').replace(/<sup>(.*?)<\/sup>/g, '<tspan baseline-shift="super" font-size="75%">$1</tspan>');
+}
+const FIGS = new Map();
+let HILITE = null;
+function plot(id, spec) {
+  const fig = document.getElementById(id);
+  const prev = FIGS.get(id); spec.cx = prev?.cx; FIGS.set(id, spec);
+  if (!fig._ro) { fig._ro = new ResizeObserver(() => draw(id)); fig._ro.observe(fig); bindHover(id); }
+  if (fig._raf) { cancelAnimationFrame(fig._raf); fig._raf = 0; } clearTimeout(fig._mt);
+  if (spec.morph) { // transição animada (≈ 0,9 s, aceleração suave); termina mesmo se a aba estiver em segundo plano
+    const t0 = performance.now(), dur = spec.morph.dur || 900; spec.ms = 0;
+    const end = () => { if (FIGS.get(id) !== spec || !spec.morph) return; cancelAnimationFrame(fig._raf); fig._raf = 0; spec.morph = null; draw(id); emit('morph-end', { id }); };
+    const step = now => { const u = Math.min(1, (now - t0) / dur); spec.ms = u < 0.5 ? 4 * u ** 3 : 1 - (-2 * u + 2) ** 3 / 2; if (u >= 1) return end(); draw(id); fig._raf = requestAnimationFrame(step); };
+    fig._raf = requestAnimationFrame(step); fig._mt = setTimeout(end, dur + 250);
+  }
+  draw(id);
+}
+function holdNaN(a) { let l = NaN; for (let i = 0; i < a.length; i++) { if (Number.isFinite(a[i])) l = a[i]; else a[i] = l; } l = NaN; for (let i = a.length - 1; i >= 0; i--) { if (Number.isFinite(a[i])) l = a[i]; else a[i] = l; } return a; }
+// posição do rótulo direto de uma curva da família: nível de 85 % da própria curva, extremo (derivada) ou borda esquerda (c)
+function labelAt(f, spec, rule, lvl = 0.85) {
+  const [x0, x1] = spec.x, [y0, y1] = spec.y, N = 240, xs = [], ys = [];
+  for (let i = 0; i <= N; i++) { const x = x0 + (x1 - x0) * i / N, y = f(x); if (Number.isFinite(y) && y >= y0 && y <= y1) { xs.push(x); ys.push(y); } }
+  if (xs.length < 2) return null;
+  if (rule === 'left') { const k = Math.min(xs.length - 1, 4); return [xs[k], ys[k]]; }
+  if (rule === 'ext') { let k = 0; ys.forEach((y, i) => { if (Math.abs(y) > Math.abs(ys[k])) k = i; }); return [xs[k], ys[k]]; }
+  let lo = Infinity, hi = -Infinity; for (const y of ys) { lo = Math.min(lo, y); hi = Math.max(hi, y); }
+  const lv = lo + lvl * (hi - lo);
+  for (let i = 1; i < ys.length; i++) if ((ys[i - 1] - lv) * (ys[i] - lv) <= 0) return [xs[i], ys[i]];
+  return [xs[xs.length >> 1], ys[ys.length >> 1]];
+}
+function draw(id) {
+  const fig = document.getElementById(id), spec = FIGS.get(id); if (!spec) return;
+  const s = fig.querySelector('svg'), W = fig.clientWidth, H = fig.clientHeight;
+  if (W < 40 || H < 40) return;
+  const narrow = W < 440, L = narrow ? 54 : 70, R = 14, T = spec.panel ? 30 : 14, B = narrow ? 50 : 58;
+  const [x0, x1] = spec.x, [y0, y1] = spec.y;
+  const X = x => L + (x - x0) / (x1 - x0) * (W - L - R), Y = y => T + (y1 - y) / (y1 - y0) * (H - T - B);
+  spec._m = { X, Y, L, R, T, B, W, H };
+  // transição animada entre representações: interpola, em pixels, a curva antiga (eixo antigo) e a nova (eixo novo)
+  const mo = spec.morph && spec.ms < 1 ? spec.morph : null, sm = mo ? spec.ms : 1;
+  const Yo = mo ? (y => T + (mo.y[1] - y) / (mo.y[1] - mo.y[0]) * (H - T - B)) : null;
+  const op = a => a < 0.999 ? ` opacity="${Math.max(0, a).toFixed(3)}"` : '';
+  const xt = ticks(x0, x1, narrow ? 4 : 7), yt = ticks(y0, y1, narrow ? 4 : 6), yto = mo ? ticks(mo.y[0], mo.y[1], narrow ? 4 : 6) : null;
+  let g = '';
+  if (spec.panel) g += `<text x="${L}" y="18" style="font-weight:600;font-size:15px">${rich(spec.panel)}</text>`;
+  for (const v of xt.v) g += `<line class="gr" x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${H - B}"/>`;
+  for (const v of yt.v) g += `<line class="gr" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"${op(sm)}/>`;
+  if (mo) for (const v of yto.v) g += `<line class="gr" x1="${L}" x2="${W - R}" y1="${Yo(v)}" y2="${Yo(v)}"${op(1 - sm)}/>`;
+  // faixas e anotações de fundo
+  const ann = mo || spec.showAnn === false ? [] : (spec.ann || []);
+  const hiCls = a => (HILITE && a.p && a.p.split(' ').includes(HILITE)) ? ' hi' : '';
+  for (const a of ann) if (a.t === 'band') { const xa = Math.max(x0, a.x1), xb = Math.min(x1, a.x2); if (xb > xa) g += `<rect class="bandr${hiCls(a)}" x="${X(xa)}" y="${T}" width="${X(xb) - X(xa)}" height="${H - T - B}"/>`; }
+  for (const a of ann) if (a.t === 'hband') { g += `<rect class="bandr${hiCls(a)}" x="${L}" y="${Y(a.y2)}" width="${W - L - R}" height="${Y(a.y1) - Y(a.y2)}"/>`; }
+  if (!mo) for (const h of spec.hl || []) if (h.y > y0 && h.y < y1) g += `<line class="rl" x1="${L}" x2="${W - R}" y1="${Y(h.y)}" y2="${Y(h.y)}"/>`;
+  if (y0 < 0 && y1 > 0) g += `<line class="rl" x1="${L}" x2="${W - R}" y1="${Y(0)}" y2="${Y(0)}"${op(sm)}/>`;
+  if (mo && mo.y[0] < 0 && mo.y[1] > 0) g += `<line class="rl" x1="${L}" x2="${W - R}" y1="${Yo(0)}" y2="${Yo(0)}"${op(1 - sm)}/>`;
+  // curvas
+  const n = Math.max(160, Math.min(800, Math.round(W)));
+  g += `<clipPath id="cp-${id}"><rect x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}"/></clipPath><g clip-path="url(#cp-${id})">`;
+  const lay = mo ? null : spec.layer;
+  if (lay) { // camada de partículas: trajetórias e pontos ficam sob as curvas
+    for (const p of lay.paths || []) { let d = ''; p.forEach(([x, y], i) => { d += (i ? 'L' : 'M') + X(x).toFixed(1) + ' ' + Math.max(-1e4, Math.min(1e4, Y(y))).toFixed(1); }); g += `<path class="traj" d="${d}" fill="none" stroke="${COL[lay.c]}" stroke-width="1" stroke-opacity=".5" stroke-linejoin="round"/>`; }
+    if (lay.dots) { let on = '', off = ''; for (const d of lay.dots) { const c = `<circle cx="${X(d.x).toFixed(1)}" cy="${Y(d.y).toFixed(1)}" r="2.4"/>`; if (d.on) on += c; else off += c; } g += `<g class="dots-on" fill="${COL[lay.c]}" fill-opacity=".55">${on}</g><g class="dots-off" fill="none" stroke="${COL[lay.c]}" stroke-opacity=".65" stroke-width="1">${off}</g>`; }
+  }
+  const cl = p => Math.max(T - 80, Math.min(H - B + 80, p));
+  spec.series.forEach((se, i) => {
+    if (se.mk) { // série desenhada como marcadores (permite ver curvas coincidentes)
+      const k = se.mkN || 17;
+      for (let j = 0; j <= k; j++) { const x = x0 + (x1 - x0) * (j + 0.5) / (k + 1), y = se.f(x); if (!Number.isFinite(y)) continue; const px = X(x), py = Y(y), r = 5;
+        g += se.mk === 'tri' ? `<path d="M${px} ${py - r - 1.5}L${px + r + 1.5} ${py + r}L${px - r - 1.5} ${py + r}Z" fill="var(--bg)" stroke="${COL[se.c]}" stroke-width="1.8"/>` : `<circle cx="${px}" cy="${py}" r="${r}" fill="var(--bg)" stroke="${COL[se.c]}" stroke-width="1.8"/>`; }
+      return;
+    }
+    const sty = `fill="none" stroke="${COL[se.c]}" stroke-width="${se.w || 2.4}" stroke-dasharray="${se.dash ?? DASH[se.c]}" stroke-opacity="${se.op ?? 1}" stroke-linecap="round" stroke-linejoin="round"`;
+    const so = mo && mo.series[i];
+    if (so && !so.mk) {
+      const fn = [], fo = [];
+      for (let j = 0; j <= n; j++) { const x = x0 + (x1 - x0) * j / n; fn.push(se.f(x)); fo.push(so.f(x)); }
+      holdNaN(fn); holdNaN(fo);
+      if (fn.some(Number.isFinite) && fo.some(Number.isFinite)) {
+        let d = '';
+        for (let j = 0; j <= n; j++) { const x = x0 + (x1 - x0) * j / n, py = (1 - sm) * cl(Yo(fo[j])) + sm * cl(Y(fn[j])); d += (j ? 'L' : 'M') + X(x).toFixed(1) + ' ' + py.toFixed(1); }
+        g += `<path class="cv" d="${d}" ${sty}/>`;
+        return;
+      }
+    }
+    let d = '', pen = false;
+    for (let j = 0; j <= n; j++) {
+      const x = x0 + (x1 - x0) * j / n, y = se.f(x);
+      if (!Number.isFinite(y)) { pen = false; continue; }
+      d += (pen ? 'L' : 'M') + X(x).toFixed(1) + ' ' + Math.max(-1e4, Math.min(1e4, Y(y))).toFixed(1); pen = true;
+    }
+    g += `<path class="cv" d="${d}" ${sty}${op(mo ? sm : 1)}/>`;
+  });
+  if (lay) for (const q of lay.sq || []) if (Number.isFinite(q.y) && q.y >= y0 && q.y <= y1) g += `<rect class="obs" x="${(X(q.x) - 4).toFixed(1)}" y="${(Y(q.y) - 4).toFixed(1)}" width="8" height="8" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.6"/>`;
+  // anotações de linha
+  for (const a of ann) {
+    const c = hiCls(a);
+    if (a.t === 'h' && a.y >= y0 && a.y <= y1) g += `<line class="an${c}" x1="${L}" x2="${W - R}" y1="${Y(a.y)}" y2="${Y(a.y)}" stroke-dasharray="5 4"/>`;
+    if (a.t === 'v' && a.x >= x0 && a.x <= x1) g += `<line class="an${c}" x1="${X(a.x)}" x2="${X(a.x)}" y1="${Y(Math.min(y1, Math.max(y0, a.y ?? y1)))}" y2="${H - B}" stroke-dasharray="5 4"/>`;
+    if (a.t === 'tan') { const xa = a.x - a.half, xb = a.x + a.half; g += `<line class="an${c}" x1="${X(xa)}" y1="${Y(a.y + a.m * (xa - a.x))}" x2="${X(xb)}" y2="${Y(a.y + a.m * (xb - a.x))}"/>`; }
+  }
+  if (!mo) for (const p of spec.pts || []) {
+    const px = X(p.x), py = Y(p.y), r = 4.5;
+    const shape = p.s === 'sq' ? `<rect x="${px - r}" y="${py - r}" width="${2 * r}" height="${2 * r}"` : p.s === 'tri' ? `<path d="M${px} ${py - r - 1.5}L${px + r + 1.5} ${py + r}L${px - r - 1.5} ${py + r}Z"` : `<circle cx="${px}" cy="${py}" r="${r}"`;
+    g += `${shape} fill="${p.fill ? COL[p.c] : 'var(--bg)'}" stroke="${COL[p.c]}" stroke-width="1.8"/>`;
+  }
+  for (const a of ann) if (a.t === 'pt') g += `<circle cx="${X(a.x)}" cy="${Y(a.y)}" r="4.5" fill="var(--ink)" stroke="var(--bg)" stroke-width="2"/>`;
+  g += `</g>`;
+  // moldura e marcas (estilo de periódico: caixa fechada, marcas para dentro)
+  g += `<rect class="fr" x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}"/>`;
+  const mxs = xt.s / (xt.s >= 1 && (xt.s / 10 ** Math.floor(Math.log10(xt.s))) === 2 ? 4 : 5), mys = yt.s / 5;
+  for (let v = Math.ceil(x0 / mxs) * mxs; v <= x1 + 1e-9; v += mxs) g += `<line class="tick" x1="${X(v)}" x2="${X(v)}" y1="${H - B}" y2="${H - B - 3}"/><line class="tick" x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${T + 3}"/>`;
+  if (!mo) for (let v = Math.ceil(y0 / mys) * mys; v <= y1 + 1e-9; v += mys) g += `<line class="tick" x1="${L}" x2="${L + 3}" y1="${Y(v)}" y2="${Y(v)}"/><line class="tick" x1="${W - R}" x2="${W - R - 3}" y1="${Y(v)}" y2="${Y(v)}"/>`;
+  for (const v of xt.v) g += `<line class="tick" x1="${X(v)}" x2="${X(v)}" y1="${H - B}" y2="${H - B - 7}"/><line class="tick" x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${T + 7}"/><text class="tk" x="${X(v)}" y="${H - B + 18}" text-anchor="middle">${fmt(v, 4)}</text>`;
+  const yTicks = (vs, F, a) => { let t = ''; for (const v of vs) t += `<g${op(a)}><line class="tick" x1="${L}" x2="${L + 7}" y1="${F(v)}" y2="${F(v)}"/><line class="tick" x1="${W - R}" x2="${W - R - 7}" y1="${F(v)}" y2="${F(v)}"/><text class="tk" x="${L - 8}" y="${F(v) + 4.5}" text-anchor="end">${fmt(v, 4)}</text></g>`; return t; };
+  g += yTicks(yt.v, Y, sm); if (mo) g += yTicks(yto.v, Yo, 1 - sm);
+  g += `<text class="axl" x="${L + (W - L - R) / 2}" y="${H - 10}" text-anchor="middle">${rich(spec.xl)}</text>`;
+  g += `<text class="axl" transform="translate(${narrow ? 13 : 17} ${T + (H - T - B) / 2}) rotate(-90)" text-anchor="middle"${op(sm)}>${rich(spec.yl)}</text>`;
+  if (mo) g += `<text class="axl" transform="translate(${narrow ? 13 : 17} ${T + (H - T - B) / 2}) rotate(-90)" text-anchor="middle"${op(1 - sm)}>${rich(mo.yl)}</text><text class="lbl morphlbl" x="${L + 10}" y="${T + 20}">${mo.from} → ${mo.to}</text>`;
+  // rótulos das anotações
+  for (const a of ann) {
+    if (!a.lb) continue;
+    const c = hiCls(a); let lx, ly, anchor = 'start';
+    if (a.t === 'h') { lx = W - R - 6; ly = Y(a.y) - 6; anchor = 'end'; if (a.y < y0 || a.y > y1) continue; }
+    else if (a.t === 'v') { lx = X(a.x) + 5; ly = H - B - 8; if (a.x < x0 || a.x > x1) continue; }
+    else if (a.t === 'tan') { const xb = a.x + a.half * 0.92; lx = X(xb) + 6; ly = Y(a.y + a.m * (xb - a.x)) + (a.m > 0 ? 14 : -6); if (lx > W - R - 120) { anchor = 'end'; lx = X(xb) - 6; } }
+    else if (a.t === 'band') { const xa = Math.max(x0, a.x1), xb = Math.min(x1, a.x2); lx = (X(xa) + X(xb)) / 2; ly = T + 16; anchor = 'middle'; }
+    else if (a.t === 'hband') { lx = L + 6; ly = Y(a.y2) - 5; }
+    else if (a.t === 'pt') { lx = X(a.x) - 8; ly = Y(a.y) - 10; anchor = 'end'; if (lx < L + 60) { anchor = 'start'; lx = X(a.x) + 9; ly = Y(a.y) + 16; } }
+    g += `<text class="lbl anl${c}" x="${lx}" y="${ly}" text-anchor="${anchor}">${rich(a.lb)}</text>`;
+  }
+  // rótulos diretos da família de curvas (texto em tinta, não na cor da série)
+  // alterna rótulos entre 85 % e 15 % da altura de cada curva e desloca os que colidirem
+  if (!mo) { const boxes = [], hit = b => b.x1 < L + 2 || b.x2 > W - R - 2 || b.y1 < T + 2 || b.y2 > H - B - 2 || boxes.some(o => b.x1 < o.x2 && b.x2 > o.x1 && b.y1 < o.y2 && b.y2 > o.y1);
+    for (const se of spec.series) if (se.lab) {
+      const p = labelAt(se.f, spec, spec.labRule, spec.labRule === 'lvl' && se.li % 2 ? 0.15 : 0.85); if (!p) continue;
+      const px = X(p[0]), py = Y(p[1]), w = se.lab.replace(/<[^>]+>/g, '').length * (se.strong ? 7 : 6.4) + 4;
+      let best = null;
+      place: for (const right of [px > W - R - w - 12, !(px > W - R - w - 12)]) for (const dy of [0, 16, -16, 32, -32, 48, -48]) {
+        const ty = py + (spec.labRule === 'lvl' && se.li % 2 ? 16 : -6) + dy, tx = right ? px - 7 : px + 7, b = { x1: right ? tx - w : tx, x2: right ? tx : tx + w, y1: ty - 12, y2: ty + 3 };
+        if (!hit(b)) { best = { tx, ty, right, b }; break place; }
+      }
+      if (!best) continue; // sem espaço livre: omite o rótulo (a legenda e o texto da figura listam os valores)
+      boxes.push(best.b);
+      g += `<text class="lbl fl${se.strong ? ' st' : ''}" x="${best.tx.toFixed(1)}" y="${best.ty.toFixed(1)}" text-anchor="${best.right ? 'end' : 'start'}">${rich(se.lab)}</text>`;
+    } }
+  g += `<g class="cur" style="display:none"><line class="cl" y1="${T}" y2="${H - B}" stroke="var(--ink)" stroke-width="1" stroke-dasharray="1 3"/></g>`;
+  s.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  s.innerHTML = g;
+  if (spec.cx != null) setCursor(id, spec.cx, true);
+}
+function setCursor(id, x, quiet) {
+  const fig = document.getElementById(id), spec = FIGS.get(id); if (!spec || !spec._m) return;
+  const m = spec._m, cur = fig.querySelector('g.cur'), ro = fig.querySelector('.readout');
+  if (x == null || x < spec.x[0] || x > spec.x[1]) { if (cur) cur.style.display = 'none'; ro.style.display = 'none'; spec.cx = null; if (!quiet) emit('cursor', { id, x: null }); return; }
+  spec.cx = x;
+  const px = m.X(x);
+  cur.style.display = ''; cur.querySelector('.cl').setAttribute('x1', px); cur.querySelector('.cl').setAttribute('x2', px);
+  cur.querySelectorAll('circle').forEach(c => c.remove());
+  const lines = [];
+  for (const se of spec.series) {
+    const y = se.f(x); if (!Number.isFinite(y)) continue;
+    if (se.fam) continue;
+    if (y >= spec.y[0] && y <= spec.y[1]) cur.insertAdjacentHTML('beforeend', `<circle cx="${px}" cy="${m.Y(y)}" r="4" fill="var(--bg)" stroke="${COL[se.c]}" stroke-width="2"/>`);
+    if (se.name) lines.push(`${se.name}${se.tag ? ` <span class="rtag">(${se.tag})</span>` : ''} = ${fmt(y, 5)}${spec.pct ? ` <span class="rtag">(${fmt(100 * y, 1)} %)</span>` : ''}`);
+  }
+  ro.innerHTML = `<b>${spec.xs} = ${fmt(x, 4)}${spec.xu ? ' ' + spec.xu : ''}</b>${spec.extra ? '<br>' + spec.extra(x) : ''}<br>` + lines.join('<br>');
+  ro.style.display = 'block';
+  const left = px > (m.L + m.W - m.R) / 2;
+  const fy = spec.series.map(se => se.f(x)).find(y => Number.isFinite(y)), mid = (m.T + m.H - m.B) / 2;
+  const low = fy == null || m.Y(fy) < mid; // curva na metade de cima → quadro embaixo, e vice-versa
+  ro.style.left = (left ? Math.max(m.L + 6, px - ro.offsetWidth - 12) : Math.min(px + 12, m.W - m.R - ro.offsetWidth - 6)) + 'px'; ro.style.top = (low ? m.H - m.B - ro.offsetHeight - 10 : m.T + 10) + 'px';
+  if (!quiet) emit('cursor', { id, x });
+  if (!quiet && spec.link) setCursor(spec.link.id, spec.link.map(x), true);
+}
+function bindHover(id) {
+  const fig = document.getElementById(id);
+  const toX = ev => { const spec = FIGS.get(id), m = spec?._m; if (!m) return null; const px = ev.clientX - fig.getBoundingClientRect().left; return spec.x[0] + (px - m.L) / (m.W - m.L - m.R) * (spec.x[1] - spec.x[0]); };
+  fig.addEventListener('pointermove', ev => setCursor(id, toX(ev)));
+  fig.addEventListener('pointerleave', () => { setCursor(id, id === 'sim-fig' && S.probe != null ? S.probe : null); const sp = FIGS.get(id); if (sp?.link) setCursor(sp.link.id, null, true); });
+  fig.addEventListener('keydown', ev => {
+    const spec = FIGS.get(id); if (!spec) return; const span = spec.x[1] - spec.x[0];
+    let x = spec.cx ?? (spec.x[0] + span / 2);
+    if (ev.key === 'ArrowRight') x += span / 100; else if (ev.key === 'ArrowLeft') x -= span / 100; else if (ev.key === 'Home') x = spec.x[0]; else if (ev.key === 'End') x = spec.x[1]; else if (ev.key === 'Escape') { setCursor(id, null); return; } else return;
+    ev.preventDefault(); setCursor(id, Math.max(spec.x[0], Math.min(spec.x[1], x)));
+  });
+  fig.addEventListener('focus', () => { const spec = FIGS.get(id); if (spec && spec.cx == null) setCursor(id, (spec.x[0] + spec.x[1]) / 2); });
+}
+function keyItems(el, items) {
+  $(el).innerHTML = items.map(i => `<span><svg viewBox="0 0 36 12" aria-hidden="true">${i.mk ? i.mk : `<line x1="1" x2="35" y1="6" y2="6" stroke="${COL[i.c]}" stroke-width="2.6" stroke-dasharray="${i.dash ?? DASH[i.c]}" stroke-linecap="round"/>`}</svg><span>${i.t}</span></span>`).join('');
+}
+function seg(el, items, cur, onpick) {
+  const box = $(el);
+  box.innerHTML = items.map(([v, t]) => `<button type="button" data-v="${v}" aria-pressed="${v === cur}">${t}</button>`).join('');
+  box.onclick = e => { const b = e.target.closest('button'); if (b) onpick(b.dataset.v); };
+}
+
+// ------------------------------------------------------------ estado
+const INIT = { V: { K: 1000, r: 0.5, t0: 6, N0: 50 }, R: { b: 0 }, I2: { a: 1.2, b: 0 }, I3: { a: 1.2, b: 0, c: 0.2 }, F: { mu: 0.5, T: 300 } };
+const RM = (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })();
+const S = { model: 'ver', rep: 'orig', vmode: 'curva', zoom: true, ann: false, ...structuredClone(INIT), ref: null, fam: false, famK: null, part: false, partN: 'm', seed: 1, anim: !RM, probe: null };
+const MODELS = { ver: { name: 'Verhulst', key: 'V' }, rasch: { name: 'Rasch/1PL', key: 'R' }, i2: { name: 'TRI 2PL', key: 'I2' }, i3: { name: 'TRI 3PL', key: 'I3' }, fd: { name: 'Fermi–Dirac', key: 'F' } };
+const PARAMS = {
+  K: { l: 'Capacidade de suporte', s: 'K', u: 'indivíduos', min: 100, max: 5000, step: 50 },
+  r: { l: 'Taxa intrínseca de crescimento', s: 'r', u: 'dia⁻¹', min: 0.1, max: 2, step: 0.05 },
+  t0: { l: 'Instante central', s: 't<sub>0</sub>', u: 'dia', min: 0, max: 25, step: 0.5 },
+  N0: { l: 'População inicial', s: 'N<sub>0</sub>', u: 'indivíduos', min: 1, max: 4999, step: 1 },
+  a: { l: 'Discriminação', s: 'a', u: '(un. de θ)⁻¹', min: 0.2, max: 3, step: 0.05 },
+  b: { l: 'Dificuldade', s: 'b', u: 'un. de θ', min: -3, max: 3, step: 0.05 },
+  c: { l: 'Assíntota inferior (pseudoacerto)', s: 'c', u: '—', min: 0, max: 0.5, step: 0.01 },
+  mu: { l: 'Potencial químico', s: 'μ', u: 'eV', min: 0.1, max: 0.9, step: 0.005 },
+  T: { l: 'Temperatura absoluta', s: 'T', u: 'K', min: 10, max: 3000, step: 10 },
+  E0: { l: 'Referência de energia', s: 'E<sub>0</sub>', u: 'eV', min: 0, max: 1, step: 0.005 },
+  lambda: { l: 'Escala de conversão', s: 'λ', u: 'eV/(un. de θ)', min: 0.005, max: 0.2, step: 0.0005 },
+};
+// números exibidos e digitados no padrão brasileiro: vírgula decimal ("0,5"); ponto também é aceito
+const fmtIn = v => String(+(+v).toPrecision(6)).replace('.', ',');
+const parseNum = s => { s = String(s).trim().replace(/\s/g, ''); if (s === '') return NaN; if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.'); return +s; };
+function ptable(caption, rows, pre) {
+  return `<table class="ptab"><caption>${caption}</caption><thead class="sr"><tr><th>Símbolo</th><th>Grandeza e controle deslizante</th><th>Valor</th><th>Unidade</th></tr></thead><tbody>${rows.map(r => {
+    const p = PARAMS[r.k], id = `${pre}-${r.k}`, min = r.min ?? p.min, max = r.max ?? p.max, attr = r.s ? `data-s="${r.k}"` : `data-k="${r.k}"`;
+    const val = +(+r.v).toPrecision(6);
+    return `<tr class="pr${r.locked ? ' locked' : ''}" data-p="${r.k}"><td class="sym">${p.s}</td><td class="ctlc"><label for="${id}-n">${p.l}${r.locked ? ' <span class="lock">vinculado</span>' : ''}</label><input type="range" id="${id}" ${attr} min="${min}" max="${max}" step="${p.step}" value="${val}" ${r.locked ? 'disabled' : ''} aria-label="${p.l} (controle deslizante)"></td><td class="valc"><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="${id}-n" ${attr} data-num="1" data-min="${min}" data-max="${max}" value="${fmtIn(val)}" ${r.locked ? 'disabled' : ''}></td><td class="unit">${p.u}</td></tr>`;
+  }).join('')}</tbody></table>`;
+}
+// campo de texto numérico: aplica ao confirmar (Enter, sair do campo) ou após uma pausa na digitação
+function numField(box, commit) {
+  const fire = el => { clearTimeout(el._t); commit(el, parseNum(el.value)); };
+  box.addEventListener('input', e => { const el = e.target; if (!el.dataset.num) return; clearTimeout(el._t); el._t = setTimeout(() => fire(el), 900); });
+  box.addEventListener('change', e => { if (e.target.dataset.num) fire(e.target); });
+  box.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.dataset.num) { e.preventDefault(); fire(e.target); } });
+}
+function bindHilite(box, figs) {
+  box._figs = figs;
+  if (box._hlBound) return; box._hlBound = true; // ouvintes registrados uma única vez por contêiner
+  const set = k => { if (HILITE === k) return; HILITE = k; box.querySelectorAll('tr[data-p]').forEach(tr => tr.classList.toggle('hi', tr.dataset.p === k)); box._figs.forEach(draw); emit('hilite', { k }); };
+  box.addEventListener('pointerover', e => { const tr = e.target.closest('tr[data-p]'); set(tr ? tr.dataset.p : null); });
+  box.addEventListener('pointerleave', () => set(null));
+  box.addEventListener('focusin', e => { const tr = e.target.closest('tr[data-p]'); set(tr ? tr.dataset.p : null); });
+  box.addEventListener('focusout', e => { if (!box.contains(e.relatedTarget)) set(null); });
+}
+
+// ------------------------------------------------- definição dos modelos
+function modelSpec(m, P, rep) {
+  if (m === 'ver') {
+    const pv = { K: P.K, r: P.r, t0: P.t0 }, ytop = o => Math.ceil(o * 1.1 / 100) * 100;
+    const R = {
+      orig: { f: safe(t => C.verhulst.N(t, pv)), y: [0, ytop(Math.max(P.K, S.ref?.m === 'ver' ? S.ref.P.K : 0))], yl: 'População, <i>N</i> (indivíduos)', nm: 'N(t)' },
+      norm: { f: safe(t => C.verhulst.n(t, pv)), y: [0, 1.08], yl: 'Fração da capacidade, <i>n</i> = <i>N</i>/<i>K</i>', nm: 'n(t)' },
+      logit: { f: safe(t => Math.abs(C.verhulst.z(t, pv)) <= 15 ? C.logit(C.verhulst.n(t, pv)) : NaN), y: [-15, 15], yl: 'ln[<i>n</i>/(1 − <i>n</i>)]', nm: 'logit n' },
+      der: { f: safe(t => C.verhulst.dNdt(t, pv)), y: [0, Math.ceil(P.r * P.K / 4 * 1.25)], yl: 'Taxa, d<i>N</i>/d<i>t</i> (indivíduos dia<sup>−1</sup>)', nm: 'dN/dt' },
+    }[rep];
+    return { ...R, x: [0, 30], xl: 'Tempo, <i>t</i> (dias)', xs: 't', xu: 'dias', c: 'ver', center: P.t0 };
+  }
+  if (m === 'fd') {
+    const pf = { mu: P.mu, T: P.T }, kT = C.KB_EV * P.T;
+    const x = S.zoom ? [Math.max(0, P.mu - 0.15), P.mu + 0.15] : [0, 1];
+    const R = {
+      orig: { f: safe(E => C.fermi.f(E, pf)), y: [0, 1.08], yl: 'Ocupação média, <i>f</i>', nm: 'f(E)' },
+      norm: { f: safe(E => C.fermi.f(E, pf)), y: [0, 1.08], yl: 'Ocupação média, <i>f</i> (já normalizada)', nm: 'f(E)' },
+      logit: { f: safe(E => Math.abs((P.mu - E) / kT) <= 15 ? C.logit(C.fermi.f(E, pf)) : NaN), y: [-15, 15], yl: 'ln[<i>f</i>/(1 − <i>f</i>)]', nm: 'logit f' },
+      der: { f: safe(E => C.fermi.dfdE(E, pf)), y: [-1.25 / (4 * kT), 0.08 / (4 * kT)], yl: 'd<i>f</i>/d<i>E</i> (eV<sup>−1</sup>)', nm: 'df/dE' },
+    }[rep];
+    return { ...R, x, xl: 'Energia, <i>E</i> (eV)', xs: 'E', xu: 'eV', c: 'fd', center: P.mu };
+  }
+  const ip = m === 'rasch' ? { a: 1, b: P.b, c: 0 } : m === 'i2' ? { a: P.a, b: P.b, c: 0 } : { a: P.a, b: P.b, c: P.c };
+  const R = {
+    orig: { f: safe(t => C.irt.P(t, ip)), y: [0, 1.08], yl: 'Probabilidade de acerto, <i>P</i>', nm: 'P(θ)' },
+    norm: { f: safe(t => C.irt.q(t, ip)), y: [0, 1.08], yl: m === 'i3' ? 'Probabilidade normalizada, <i>q</i>' : 'Probabilidade de acerto, <i>P</i>', nm: m === 'i3' ? 'q(θ)' : 'P(θ)' },
+    logit: { f: safe(t => Math.abs(C.irt.z(t, ip)) <= 15 ? C.logit(C.irt.q(t, ip)) : NaN), y: [-15, 15], yl: m === 'i3' ? 'logit <i>q</i>' : 'logit <i>P</i>', nm: 'logit' },
+    der: { f: safe(t => C.irt.dP(t, ip)), y: [0, Math.max(0.3, (1 - ip.c) * ip.a / 4 * 1.25)], yl: 'Inclinação, d<i>P</i>/d<i>θ</i>', nm: 'dP/dθ' },
+  }[rep];
+  return { ...R, x: [-4, 4], xl: 'Proficiência, <i>θ</i> (escala da TRI)', xs: 'θ', xu: '', c: 'tri', center: P.b, ip };
+}
+function effParams(m) {
+  if (m === 'ver') { const v = S.V; return S.vmode === 'curva' ? { ...v } : { ...v, t0: C.verhulst.t0FromN0(v.K, v.r, Math.min(v.N0, v.K - 1)) }; }
+  if (m === 'rasch') return { ...S.R, a: 1 };
+  return { ...S[MODELS[m].key] };
+}
+// Geometria dos parâmetros desenhada sobre a curva
+function annotations(m, P, rep) {
+  const A = [];
+  if (m === 'ver') {
+    const w = W1090 / P.r, x0 = P.t0, cP = S.vmode === 'curva' ? 't0' : 'N0';
+    if (rep === 'orig' || rep === 'norm') {
+      const B = rep === 'orig' ? P.K : 1, m0 = B * P.r / 4;
+      A.push({ t: 'h', y: B, p: 'K', lb: rep === 'orig' ? '<i>K</i> (capacidade de suporte)' : '<i>n</i> = 1' });
+      A.push({ t: 'band', x1: x0 - w / 2, x2: x0 + w / 2, p: 'r', lb: '10 %–90 %: 4,39/<i>r</i>' });
+      A.push({ t: 'tan', x: x0, y: B / 2, m: m0, half: (B / 2) / m0, p: 'r K', lb: rep === 'orig' ? 'inclinação <i>rK</i>/4' : 'inclinação <i>r</i>/4' });
+      A.push({ t: 'v', x: x0, y: B / 2, p: `${cP} r`, lb: '<i>t</i><sub>0</sub>' });
+      A.push({ t: 'pt', x: x0, y: B / 2, p: cP, lb: rep === 'orig' ? '(<i>t</i><sub>0</sub>, <i>K</i>/2)' : '(<i>t</i><sub>0</sub>, 1/2)' });
+      if (S.vmode === 'ci' && rep === 'orig') A.push({ t: 'pt', x: 0.0001, y: C.verhulst.N(0, P), p: 'N0', lb: '<i>N</i><sub>0</sub>' });
+    } else if (rep === 'logit') {
+      A.push({ t: 'tan', x: x0, y: 0, m: P.r, half: 10 / P.r, p: 'r', lb: 'inclinação <i>r</i>' }); A.push({ t: 'pt', x: x0, y: 0, p: cP, lb: '<i>t</i><sub>0</sub>' });
+    } else { A.push({ t: 'pt', x: x0, y: P.r * P.K / 4, p: 'r K', lb: 'máximo <i>rK</i>/4' }); A.push({ t: 'v', x: x0, y: P.r * P.K / 4, p: cP, lb: '<i>t</i><sub>0</sub>' }); }
+    return A;
+  }
+  if (m === 'fd') {
+    const kT = C.KB_EV * P.T, w = W1090 * kT;
+    if (rep === 'orig' || rep === 'norm') {
+      A.push({ t: 'band', x1: P.mu - w / 2, x2: P.mu + w / 2, p: 'T', lb: '10 %–90 %: 4,39 <i>k</i><sub>B</sub><i>T</i>' });
+      A.push({ t: 'tan', x: P.mu, y: 0.5, m: -1 / (4 * kT), half: 2 * kT, p: 'T', lb: 'inclinação −1/(4<i>k</i><sub>B</sub><i>T</i>)' });
+      A.push({ t: 'v', x: P.mu, y: 0.5, p: 'mu', lb: '<i>μ</i>' });
+      A.push({ t: 'pt', x: P.mu, y: 0.5, p: 'mu', lb: '(<i>μ</i>, 1/2)' });
+    } else if (rep === 'logit') {
+      A.push({ t: 'tan', x: P.mu, y: 0, m: -1 / kT, half: 10 * kT, p: 'T', lb: 'inclinação −1/(<i>k</i><sub>B</sub><i>T</i>)' }); A.push({ t: 'pt', x: P.mu, y: 0, p: 'mu', lb: '<i>μ</i>' });
+    } else { A.push({ t: 'pt', x: P.mu, y: -1 / (4 * kT), p: 'T mu', lb: 'mínimo −1/(4<i>k</i><sub>B</sub><i>T</i>)' }); }
+    return A;
+  }
+  const a = m === 'rasch' ? 1 : P.a, c = m === 'i3' ? P.c : 0, w = W1090 / a;
+  if (rep === 'orig' || rep === 'norm') {
+    const cc = rep === 'orig' ? c : 0, yc = cc + (1 - cc) / 2, m0 = (1 - cc) * a / 4;
+    if (cc > 0) A.push({ t: 'hband', y1: 0, y2: cc, p: 'c', lb: '<i>c</i> (pseudoacerto)' });
+    A.push({ t: 'band', x1: P.b - w / 2, x2: P.b + w / 2, p: 'a', lb: m === 'rasch' ? '10 %–90 %: 4,39' : '10 %–90 %: 4,39/<i>a</i>' });
+    A.push({ t: 'tan', x: P.b, y: yc, m: m0, half: (1 - cc) / 2 / m0, p: 'a c', lb: cc ? 'inclinação (1 − <i>c</i>)<i>a</i>/4' : (m === 'rasch' ? 'inclinação 1/4' : 'inclinação <i>a</i>/4') });
+    A.push({ t: 'v', x: P.b, y: yc, p: 'b', lb: '<i>b</i>' });
+    A.push({ t: 'pt', x: P.b, y: yc, p: 'b c', lb: cc ? '(<i>b</i>, (1 + <i>c</i>)/2)' : '(<i>b</i>, 1/2)' });
+  } else if (rep === 'logit') {
+    A.push({ t: 'tan', x: P.b, y: 0, m: a, half: 10 / a, p: 'a', lb: m === 'rasch' ? 'inclinação 1' : 'inclinação <i>a</i>' }); A.push({ t: 'pt', x: P.b, y: 0, p: 'b', lb: '<i>b</i>' });
+  } else { A.push({ t: 'pt', x: P.b, y: (1 - c) * a / 4, p: 'a c', lb: c ? 'máximo (1 − <i>c</i>)<i>a</i>/4' : 'máximo <i>a</i>/4' }); A.push({ t: 'v', x: P.b, y: (1 - c) * a / 4, p: 'b', lb: '<i>b</i>' }); }
+  return A;
+}
+
+// ------------------------------------------- camadas de leitura (v2.3)
+const REPSHORT = { orig: 'Original', norm: 'Normalizada', logit: 'Logit', der: 'Derivada' };
+function tableKeys(m) { return m === 'ver' ? (S.vmode === 'curva' ? ['K', 'r', 't0'] : ['K', 'r', 'N0']) : m === 'rasch' ? ['b'] : m === 'i2' ? ['a', 'b'] : m === 'i3' ? ['a', 'b', 'c'] : ['mu', 'T']; }
+// 6 · família de curvas: varia um parâmetro (×¼, ×½, ×2, ×4 ou deslocamentos fixos) mantendo os demais
+const FAMDEF = { ver: 'r', rasch: 'b', i2: 'a', i3: 'a', fd: 'T' };
+const FAMADD = { b: [-2, -1, 1, 2], t0: [-6, -3, 3, 6], mu: [-0.1, -0.05, 0.05, 0.1], c: [-0.2, -0.1, 0.1, 0.2] };
+function family(m, P, k) {
+  const p = PARAMS[k], v = P[k]; let lo = p.min, hi = p.max;
+  if (m === 'ver' && k === 'N0') hi = P.K - 1;
+  if (m === 'ver' && k === 'K' && S.vmode === 'ci') lo = Math.max(lo, P.N0 + 1);
+  const raw = FAMADD[k] ? FAMADD[k].map(d => v + d) : [0.25, 0.5, 2, 4].map(f => v * f);
+  const vals = [...new Set(raw.map(w => +Math.min(hi, Math.max(lo, w)).toPrecision(6)))].filter(w => Math.abs(w - v) > 1e-9 * Math.max(1, Math.abs(v))).sort((a, b) => a - b);
+  return vals.map(w => { const Q = { ...P, [k]: w }; if (m === 'ver' && S.vmode === 'ci') Q.t0 = C.verhulst.t0FromN0(Q.K, Q.r, Math.min(Q.N0, Q.K - 1)); return { w, f: modelSpec(m, Q, S.rep).f }; });
+}
+function sameCurve(f, g, x) { for (let i = 0; i <= 60; i++) { const t = x[0] + (x[1] - x[0]) * i / 60, a = f(t), b = g(t); if (Number.isFinite(a) !== Number.isFinite(b)) return false; if (Number.isFinite(a) && Math.abs(a - b) > 1e-9 * Math.max(1, Math.abs(a))) return false; } return true; }
+function yExtent(f, x) { let lo = Infinity, hi = -Infinity; for (let i = 0; i <= 240; i++) { const y = f(x[0] + (x[1] - x[0]) * i / 240); if (Number.isFinite(y)) { lo = Math.min(lo, y); hi = Math.max(hi, y); } } return [lo, hi]; }
+// 4 · partículas: o fenômeno por trás da curva, com sorteios reprodutíveis (mesma semente → mesmos pontos ao mexer nos parâmetros)
+function rng(seed) { let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const PSIZE = { p: { tri: 60, fd: 4, ver: 3 }, m: { tri: 300, fd: 20, ver: 8 }, g: { tri: 1500, fd: 100, ver: 20 } };
+const FD_LEVELS = 25, VER_DT = 0.05, VER_STEPS = 600, DRAWS = new Map();
+function draws(kind, size, seed) {
+  const key = kind + size + seed; if (DRAWS.has(key)) return DRAWS.get(key);
+  const R = rng(seed * 7919 + kind.charCodeAt(0) * 104729 + size.charCodeAt(0)), n = PSIZE[size][kind]; let d;
+  if (kind === 'tri') d = Array.from({ length: n }, () => ({ x: R(), u: R(), j: R() }));
+  else if (kind === 'fd') d = Array.from({ length: FD_LEVELS }, () => Array.from({ length: n }, () => ({ u: R(), j: R(), k: R() })));
+  else { const gauss = () => { let u = 0; while (!u) u = R(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * R()); }; d = Array.from({ length: n }, () => Float64Array.from({ length: VER_STEPS }, gauss)); }
+  DRAWS.set(key, d); return d;
+}
+const LAYKEY = {
+  tri: c => [{ mk: `<circle cx="10" cy="6" r="3" fill="${c}" fill-opacity=".6"/><circle cx="24" cy="6" r="3" fill="none" stroke="${c}"/>`, t: 'acerto / erro (simulados)' }, { mk: `<rect x="13" y="2" width="8" height="8" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.6"/>`, t: 'proporção observada por faixa' }],
+  fd: c => [{ mk: `<circle cx="10" cy="6" r="3" fill="${c}" fill-opacity=".6"/><circle cx="24" cy="6" r="3" fill="none" stroke="${c}"/>`, t: 'estado ocupado / vazio (simulados)' }, { mk: `<rect x="13" y="2" width="8" height="8" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.6"/>`, t: 'fração ocupada por nível' }],
+  ver: c => [{ mk: `<path d="M1 8 L6 5 L10 7 L15 3 L20 6 L25 4 L30 6 L35 3" fill="none" stroke="${c}" stroke-opacity=".6"/>`, t: 'populações simuladas' }],
+};
+function particles(m, P, rep, spec) {
+  if (rep !== 'orig' && rep !== 'norm') return { note: 'As partículas aparecem nas representações <b>Original</b> e <b>Normalizada</b>, em que o eixo vertical é uma probabilidade, uma ocupação ou uma população.' };
+  const size = S.partN, [x0, x1] = spec.x, band = (on, j) => on ? 0.985 + 0.07 * j : 0.005 + 0.07 * j;
+  if (m === 'ver') { // ruído demográfico: dN = rN(1 − N/K) dt + √[rN(1 + N/K)] dW (nascimentos rN, mortes rN²/K)
+    const Z = draws('ver', size, S.seed), K = P.K, r = P.r, sc = rep === 'norm' ? 1 / K : 1, N0 = C.verhulst.N(0, P), paths = [], ends = [];
+    for (const z of Z) {
+      let N = N0; const pts = [[0, N * sc]];
+      for (let i = 0; i < VER_STEPS; i++) { const vol = Math.sqrt(Math.max(0, r * N * (1 + N / K))); N = Math.max(0, N + r * N * (1 - N / K) * VER_DT + vol * Math.sqrt(VER_DT) * z[i]); if (i % 4 === 3) pts.push([(i + 1) * VER_DT, N * sc]); }
+      paths.push(pts); ends.push(N);
+    }
+    const mean = ends.reduce((a, v) => a + v, 0) / ends.length, sd = Math.sqrt(ends.reduce((a, v) => a + (v - mean) ** 2, 0) / Math.max(1, ends.length - 1)), ext = ends.filter(v => v === 0).length;
+    return { layer: { paths, c: 'ver' }, kind: 'ver', note: `<b>${ends.length} populações simuladas</b> com nascimentos e mortes ao acaso. Em <i>t</i> = 30 dias: média ${fmt(mean, 0)} e desvio-padrão ${fmt(sd, 0)} indivíduos (${fmt(100 * sd / K, 1)} % de <i>K</i>)${ext ? `; ${ext} população(ões) extinta(s) por acaso` : ''}. A curva logística descreve o comportamento médio; a flutuação relativa diminui quando <i>K</i> aumenta (≈ 1/√<i>K</i>).` };
+  }
+  if (m === 'fd') {
+    const D = draws('fd', size, S.seed), dE = (x1 - x0) / FD_LEVELS, dots = [], sq = [], pf = { mu: P.mu, T: P.T }; let dev = 0;
+    D.forEach((lev, i) => {
+      const E = x0 + (i + 0.5) * dE, f = C.fermi.f(E, pf); let occ = 0;
+      for (const st of lev) { const on = st.u < f; if (on) occ++; dots.push({ x: E + (st.k - 0.5) * dE * 0.6, y: band(on, st.j), on }); }
+      sq.push({ x: E, y: occ / lev.length }); dev += Math.abs(occ / lev.length - f);
+    });
+    return { layer: { dots, sq, c: 'fd' }, kind: 'fd', note: `<b>${FD_LEVELS} níveis de energia com ${PSIZE[size].fd} estados cada</b> (● ocupado, ○ vazio). A fração ocupada em cada nível (■) aproxima <i>f</i>(<i>E</i>), a ocupação média de um estado: desvio médio ${fmt(dev / FD_LEVELS, 3)}. Bem abaixo de <i>μ</i> quase tudo está ocupado; bem acima, quase tudo vazio; a transição tem largura ≈ 4,39 <i>k</i><sub>B</sub><i>T</i>.` };
+  }
+  const D = draws('tri', size, S.seed), ip = spec.ip, nb = 16, cnt = new Array(nb).fill(0), hit = new Array(nb).fill(0), dots = [];
+  for (const d of D) { const th = x0 + d.x * (x1 - x0), on = d.u < C.irt.P(th, ip), b = Math.min(nb - 1, Math.floor(d.x * nb)); cnt[b]++; if (on) hit[b]++; dots.push({ x: th, y: band(on, d.j), on }); }
+  const tr = rep === 'norm' && m === 'i3' ? p => (p - ip.c) / (1 - ip.c) : p => p, sq = []; let dev = 0, nn = 0;
+  for (let b = 0; b < nb; b++) { if (cnt[b] < 3) continue; const xc = x0 + (b + 0.5) / nb * (x1 - x0), p = hit[b] / cnt[b]; sq.push({ x: xc, y: tr(p) }); dev += cnt[b] * Math.abs(p - C.irt.P(xc, ip)); nn += cnt[b]; }
+  return { layer: { dots, sq, c: 'tri' }, kind: 'tri', note: `<b>${D.length} estudantes</b> com proficiências sorteadas uniformemente entre −4 e 4 (● acertou, ○ errou). Em cada faixa de <i>θ</i>, a proporção de acertos (■) aproxima <i>P</i>(<i>θ</i>): desvio médio ${nn ? fmt(dev / nn, 3) : '—'}. Aumente a amostra e o desvio cai, aproximadamente com 1/√<i>n</i>.${tr(0.5) !== 0.5 ? ' Na forma normalizada as proporções foram convertidas em <i>q</i> = (<i>p</i> − <i>c</i>)/(1 − <i>c</i>).' : ''}` };
+}
+
+// ------------------------------------------------------------ SIMULAR
+function equations(m, P) {
+  const T = fmtT;
+  if (m === 'ver') return [[`N(t)=\\dfrac{K}{1+e^{-r\\,(t-t_0)}}`, `${V('N')}(${V('t')}) = ${V('K')}/[1 + e<sup>−${V('r')}(${V('t')} − ${V('t')}<sub>0</sub>)</sup>]`], [`N(t)=\\dfrac{${T(P.K, 0)}}{1+e^{-${T(P.r)}\\,(t-${T(P.t0, 3)})}}`, `${V('N')}(${V('t')}) = ${fmt(P.K, 0)}/[1 + e<sup>−${fmt(P.r)}(${V('t')} − ${fmt(P.t0, 3)})</sup>]`]];
+  if (m === 'fd') return [[`f(E)=\\dfrac{1}{1+e^{(E-\\mu)/k_BT}}`, `${V('f')}(${V('E')}) = 1/[1 + e<sup>(${V('E')} − ${V('μ')})/(${V('k')}<sub>B</sub>${V('T')})</sup>]`], [`f(E)=\\dfrac{1}{1+e^{(E-${T(P.mu)}\\,\\mathrm{eV})/(${T(C.KB_EV * P.T * 1000, 3)}\\,\\mathrm{meV})}}`, `${V('f')}(${V('E')}) = 1/[1 + e<sup>(${V('E')} − ${fmt(P.mu)} eV)/(${fmt(C.KB_EV * P.T * 1000, 3)} meV)</sup>]`]];
+  if (m === 'rasch') return [[`P(\\theta)=\\dfrac{1}{1+e^{-(\\theta-b)}}`, `${V('P')}(${V('θ')}) = 1/[1 + e<sup>−(${V('θ')} − ${V('b')})</sup>]`], [`P(\\theta)=\\dfrac{1}{1+e^{-(\\theta-${T(P.b)})}}`, `${V('P')}(${V('θ')}) = 1/[1 + e<sup>−(${V('θ')} − ${fmt(P.b)})</sup>]`]];
+  if (m === 'i2') return [[`P(\\theta)=\\dfrac{1}{1+e^{-a(\\theta-b)}}`, `${V('P')}(${V('θ')}) = 1/[1 + e<sup>−${V('a')}(${V('θ')} − ${V('b')})</sup>]`], [`P(\\theta)=\\dfrac{1}{1+e^{-${T(P.a)}\\,(\\theta-${T(P.b)})}}`, `${V('P')}(${V('θ')}) = 1/[1 + e<sup>−${fmt(P.a)}(${V('θ')} − ${fmt(P.b)})</sup>]`]];
+  return [[`P(\\theta)=c+\\dfrac{1-c}{1+e^{-a(\\theta-b)}}`, `${V('P')}(${V('θ')}) = ${V('c')} + (1 − ${V('c')})/[1 + e<sup>−${V('a')}(${V('θ')} − ${V('b')})</sup>]`], [`P(\\theta)=${T(P.c)}+\\dfrac{${T(1 - P.c)}}{1+e^{-${T(P.a)}\\,(\\theta-${T(P.b)})}}`, `${V('P')}(${V('θ')}) = ${fmt(P.c)} + ${fmt(1 - P.c)}/[1 + e<sup>−${fmt(P.a)}(${V('θ')} − ${fmt(P.b)})</sup>]`]];
+}
+function derived(m, P) { // [grandeza, expressão, valor]
+  if (m === 'ver') return [['Instante central', S.vmode === 'curva' ? V('t') + '<sub>0</sub>' : 'ln[(K − N₀)/N₀]/' + V('r'), fmt(P.t0, 3) + ' dias'], ['População no centro', V('K') + '/2', fmt(P.K / 2, 1)], ['Inclinação máxima', V('rK') + '/4', fmt(P.r * P.K / 4, 2) + ' ind./dia'], ['Largura 10 %–90 %', '4,39/' + V('r'), fmt(W1090 / P.r, 2) + ' dias'], ['População em <i>t</i> = 0', V('N') + '(0)', fmt(C.verhulst.N(0, P), 2)]];
+  if (m === 'fd') return [['Centro (<i>f</i> = 1/2)', V('μ'), fmt(P.mu, 3) + ' eV'], ['Energia térmica', V('k') + '<sub>B</sub>' + V('T'), fmt(C.KB_EV * P.T * 1000, 2) + ' meV'], ['Inclinação central', '−1/(4' + V('k') + '<sub>B</sub>' + V('T') + ')', fmt(-1 / (4 * C.KB_EV * P.T), 2) + ' eV⁻¹'], ['Largura 10 %–90 %', '4,39 ' + V('k') + '<sub>B</sub>' + V('T'), fmt(W1090 * C.KB_EV * P.T * 1000, 1) + ' meV']];
+  const c = m === 'i3' ? P.c : 0, a = m === 'rasch' ? 1 : P.a;
+  const r = [['Ponto de inflexão', V('θ') + ' = ' + V('b'), fmt(P.b, 2)], ['Probabilidade em <i>θ</i> = <i>b</i>', '(1 + ' + V('c') + ')/2', fmt((1 + c) / 2, 3)], ['Inclinação central', '(1 − ' + V('c') + ')' + V('a') + '/4', fmt((1 - c) * a / 4, 3)], ['Largura 10 %–90 % de <i>q</i>', '4,39/' + V('a'), fmt(W1090 / a, 3)]];
+  if (m === 'i3') r.push(['<i>θ</i> em que <i>P</i> = 1/2', V('b') + ' + logit[(1/2 − c)/(1 − c)]/' + V('a'), c < 0.5 ? fmt(C.irt.thetaAt(0.5, { a, b: P.b, c }), 3) : '—']);
+  else r.push(['Informação máxima', V('a') + '²/4', fmt(a * a / 4, 3)]);
+  return r;
+}
+function dtable(caption, rows) { return `<caption>${caption}</caption><thead><tr><th>Grandeza</th><th>Expressão</th><th style="text-align:right">Valor</th></tr></thead><tbody>${rows.map(([g, e, v]) => `<tr><td>${g}</td><td>${e}</td><td class="n">${v}</td></tr>`).join('')}</tbody>`; }
+const LIMITS = {
+  ver: '<i>n</i> = <i>N</i>/<i>K</i> é uma fração da capacidade de suporte, não uma probabilidade de acerto nem uma ocupação quântica. O modelo descreve crescimento dependente da densidade; não há “vagas” físicas.',
+  rasch: '<i>θ</i> é uma posição numa escala psicométrica latente, sem unidade física. No Rasch a inclinação é comum a todos os itens: as retas logit são paralelas.',
+  i2: 'A discriminação <i>a</i> mede quão bem o item separa respondentes perto de <i>θ</i> = <i>b</i>. Não é uma temperatura, embora desempenhe papel formal parecido com 1/(<i>k</i><sub>B</sub><i>T</i>).',
+  i3: 'No 3PL, <i>b</i> é o ponto de inflexão, mas a probabilidade ali vale (1 + <i>c</i>)/2, não 1/2. Só a curva normalizada <i>q</i> coincide com a logística padrão. <i>c</i> é estimado, não necessariamente 1/(número de alternativas).',
+  fd: '<i>f</i> é a ocupação média de um único estado quântico por férmions em equilíbrio. Aqui <i>μ</i> é mantido fixo; num sistema com número de partículas fixo, <i>μ</i> dependeria de <i>T</i>.',
+};
+let prevP = null;
+function explain(m, P, Q) {
+  if (!Q) return 'Altere um parâmetro da Tabela 1: aqui aparece o efeito da mudança sobre a curva.';
+  const ch = Object.keys(P).find(k => typeof P[k] === 'number' && Math.abs(P[k] - Q[k]) > 1e-12 && (k !== 't0' || S.vmode === 'curva' || m !== 'ver'));
+  if (!ch) return null;
+  const up = P[ch] > Q[ch], w = up ? 'aumentou' : 'diminuiu';
+  const T = {
+    K: `${V('K')} ${w}: a assíntota superior ${up ? 'sobe' : 'desce'} e a inclinação máxima ${V('rK')}/4 ${up ? 'cresce' : 'diminui'} na mesma proporção. Na representação normalizada ${V('n')} = ${V('N')}/${V('K')} a curva não muda${S.vmode === 'ci' ? ', mas <i>t</i><sub>0</sub> muda porque <i>N</i><sub>0</sub> foi mantido' : ''}.`,
+    r: S.vmode === 'curva' ? `${V('r')} ${w}: a transição fica ${up ? 'mais abrupta' : 'mais suave'} — a faixa de 10 % a 90 % ${up ? 'estreita' : 'alarga'} (4,39/${V('r')}) e a inclinação central ${V('rK')}/4 ${up ? 'aumenta' : 'diminui'}. O instante central ${V('t')}<sub>0</sub> permanece fixo neste modo.` : `${V('r')} ${w} com ${V('N')}<sub>0</sub> mantido: ${V('t')}<sub>0</sub> = ln[(K − N₀)/N₀]/${V('r')} ${up ? 'diminui' : 'aumenta'}, então a população atinge K/2 ${up ? 'mais cedo' : 'mais tarde'} e a curva fica ${up ? 'mais íngreme' : 'mais suave'}.`,
+    t0: `${V('t')}<sub>0</sub> ${w}: a curva desloca-se para a ${up ? 'direita' : 'esquerda'} sem mudar de forma. Atenção: isso também altera a população em ${V('t')} = 0.`,
+    N0: `${V('N')}<sub>0</sub> ${w}: o instante central ${V('t')}<sub>0</sub> ${up ? 'diminui' : 'aumenta'} — com mais indivíduos no início, K/2 é atingido ${up ? 'antes' : 'depois'}. A forma da curva não muda.`,
+    a: `${V('a')} ${w}: a transição em torno de ${V('θ')} = ${V('b')} fica ${up ? 'mais abrupta — o item separa melhor' : 'mais suave — o item separa pior'} respondentes de proficiências próximas; a faixa de 10 % a 90 % ${up ? 'estreita' : 'alarga'} (4,39/${V('a')}). A inclinação central ${m === 'i3' ? '(1 − c)a/4' : 'a/4'} ${up ? 'aumenta' : 'diminui'}.`,
+    b: `${V('b')} ${w}: o item ficou ${up ? 'mais difícil' : 'mais fácil'} e a curva desloca-se para a ${up ? 'direita' : 'esquerda'}. ${m === 'i3' ? 'O ponto de inflexão acompanha b.' : 'O ponto com P = 1/2 acompanha b.'}`,
+    c: `${V('c')} ${w}: a assíntota inferior ${up ? 'sobe' : 'desce'}. Em ${V('θ')} = ${V('b')} a probabilidade é (1 + c)/2 = ${fmt((1 + P.c) / 2, 3)}, e a inclinação central (1 − c)a/4 ${up ? 'diminui' : 'aumenta'}.`,
+    T: `${V('T')} ${w}: a transição ${up ? 'alarga' : 'estreita'} — a faixa de 10 % a 90 % vale 4,39 ${V('k')}<sub>B</sub>${V('T')} — e |inclinação central| = 1/(4${V('k')}<sub>B</sub>${V('T')}) ${up ? 'diminui' : 'aumenta'}. Em ${V('E')} = ${V('μ')} a ocupação continua 1/2; abaixo de μ ela ${up ? 'diminui' : 'aumenta'} e acima ${up ? 'aumenta' : 'diminui'}.`,
+    mu: `${V('μ')} ${w}: a curva desloca-se para a ${up ? 'direita' : 'esquerda'}; a ocupação vale 1/2 sempre em ${V('E')} = ${V('μ')}. A largura da transição não muda.`,
+  };
+  return T[ch] || null;
+}
+const REPNAME = { orig: 'representação original', norm: 'representação normalizada', logit: 'representação linearizada (logit)', der: 'derivada em relação à variável horizontal' };
+function caption(m, P, spec) {
+  const par = m === 'ver' ? `<i>K</i> = ${fmt(P.K, 0)} indivíduos, <i>r</i> = ${fmt(P.r)} dia<sup>−1</sup>, <i>t</i><sub>0</sub> = ${fmt(P.t0, 2)} dias` : m === 'fd' ? `<i>μ</i> = ${fmt(P.mu)} eV, <i>T</i> = ${fmt(P.T, 0)} K (<i>k</i><sub>B</sub><i>T</i> = ${fmt(C.KB_EV * P.T * 1000, 2)} meV)` : m === 'rasch' ? `<i>b</i> = ${fmt(P.b)}` : m === 'i2' ? `<i>a</i> = ${fmt(P.a)}, <i>b</i> = ${fmt(P.b)}` : `<i>a</i> = ${fmt(P.a)}, <i>b</i> = ${fmt(P.b)}, <i>c</i> = ${fmt(P.c)}`;
+  const what = { ver: 'Solução logística de Verhulst', rasch: 'Curva característica do item no modelo de Rasch', i2: 'Curva característica do item na TRI de dois parâmetros', i3: 'Curva característica do item na TRI de três parâmetros', fd: 'Distribuição de Fermi–Dirac' }[m];
+  const geo = (S.rep === 'orig' || S.rep === 'norm') ? (S.ann && !S.mystery ? ' Linhas finas: geometria dos parâmetros — ponto central, tangente no ponto de inflexão e faixa sombreada da transição de 10 % a 90 %.' : '') : S.rep === 'logit' ? ' Na forma logit a curva torna-se uma reta; o gráfico é restrito a |<i>z</i>| ≤ 15 por precisão numérica.' : ' O máximo do módulo da derivada ocorre no ponto de inflexão.';
+  return `<b>Figura 1.</b> ${what}, ${REPNAME[S.rep]}, para ${par}.${geo}${S.ref && S.ref.m === m ? ' Curva cinza tracejada: referência fixada.' : ''}`;
+}
+function renderSim(changed) {
+  const m = S.model, key = MODELS[m].key;
+  seg('#sim-model', Object.entries(MODELS).map(([k, v]) => [k, v.name]), m, v => { S.model = v; S.ref = null; prevP = null; renderSim(); emit('model', { v }); });
+  seg('#sim-rep', [['orig', 'Original'], ['norm', 'Normalizada'], ['logit', 'Logit'], ['der', 'Derivada']], S.rep, v => {
+    const old = FIGS.get('sim-fig');
+    S._morph = v !== S.rep && S.anim && old && old.model === S.model && !old.morph ? { y: old.y, yl: old.yl, series: old.series, from: REPSHORT[S.rep], to: REPSHORT[v] } : null;
+    S.rep = v; renderSim(); emit('rep', { v });
+  });
+  let P;
+  try { P = effParams(m); $('#sim-alert').textContent = ''; } catch (e) { $('#sim-alert').textContent = e.message; return; }
+  if (!changed) {
+    let h = '';
+    if (m === 'ver') h += `<div class="toolbar ui" style="margin:0 0 12px"><span class="lab">Parametrização</span><span class="seg" role="group" aria-label="Parametrização">${[['curva', 'Curva (K, r, t₀)'], ['ci', 'Condição inicial (K, r, N₀)']].map(([v, t]) => `<button type="button" data-vm="${v}" aria-pressed="${S.vmode === v}">${t}</button>`).join('')}</span></div>`;
+    if (m === 'fd') h += `<div class="opts-row ui" style="margin:0 0 10px"><label><input type="checkbox" id="fd-zoom" ${S.zoom ? 'checked' : ''}> Ampliar em torno de μ (±0,15 eV)</label></div>`;
+    $('#sim-vmode').innerHTML = h;
+    const keys = tableKeys(m);
+    $('#sim-ctl').innerHTML = ptable(`<b>Tabela 1.</b> Parâmetros do modelo — ${MODELS[m].name}`, keys.map(k => ({ k, v: S[key][k], max: k === 'N0' ? S.V.K - 1 : undefined })), 'sim')
+      + (m === 'rasch' ? '<p class="small mute">No Rasch a inclinação é comum a todos os itens e fixada em <i>a</i> = 1 na escala adotada.</p>' : '')
+      + (m === 'ver' && S.vmode === 'ci' ? `<p class="small mute">Instante central calculado: <b>${fmt(P.t0, 3)} dias</b></p>` : '');
+    bindHilite($('#sim-ctl'), ['sim-fig']);
+  }
+  $('#sim-ann').checked = !!S.ann;
+  const spec = modelSpec(m, P, S.rep);
+  const series = [];
+  const refDiff = S.ref && S.ref.m === m ? tableKeys(m).filter(k => S.ref.P[k] != null && Math.abs(S.ref.P[k] - P[k]) > 1e-12) : [];
+  const tagOf = Q => refDiff.map(k => `${PARAMS[k].s} = ${fmt(Q[k], 4)}`).join(', ');
+  if (S.ref && S.ref.m === m) { const rs = modelSpec(m, S.ref.P, S.rep); series.push({ f: rs.f, c: 'ghost', name: 'referência', tag: tagOf(S.ref.P), w: 2 }); }
+  if (S.target && S.target.m === m) { const ts = modelSpec(m, S.target.P, S.rep); series.push({ f: ts.f, c: 'ink', name: 'alvo', dash: '2 5', w: 2.2 }); }
+  if (S.mystery) S.mystery.forEach(it => series.push({ f: safe(th => C.irt.P(th, it.P)), c: 'ink', name: it.name, dash: it.dash, w: 2.4 }));
+  // camadas de leitura (desligadas durante o tutorial e os desafios)
+  const lay = !S.mystery && !document.body.classList.contains('tut-on');
+  let famK = null, fam = null, coincide = false, pr = null, capX = '';
+  if (lay && S.fam) {
+    const keys = tableKeys(m); famK = keys.includes(S.famK) ? S.famK : keys.includes(FAMDEF[m]) ? FAMDEF[m] : keys[0]; S.famK = famK;
+    fam = family(m, P, famK); coincide = fam.every(F => sameCurve(F.f, spec.f, spec.x));
+    const sym = `<i>${PARAMS[famK].s}</i>`;
+    fam.forEach(F => series.push({ f: F.f, c: spec.c, w: 1.3, op: 0.5, dash: '', fam: true, lab: coincide ? undefined : `${sym} = ${fmt(F.w, 4)}` }));
+    const ex = fam.map(F => yExtent(F.f, spec.x));
+    if (m === 'ver' && S.rep === 'orig') spec.y = [0, Math.max(spec.y[1], Math.ceil(Math.max(...ex.map(e => e[1])) * 1.1 / 100) * 100)];
+    if (S.rep === 'der') { const hi = Math.max(...ex.map(e => e[1])), lo = Math.min(...ex.map(e => e[0])); if (hi > spec.y[1]) spec.y = [spec.y[0], hi * 1.12]; if (lo < spec.y[0]) spec.y = [lo * 1.12, spec.y[1]]; }
+    capX += coincide ? ` Curvas finas: família variando ${sym}; nesta representação todas coincidem com a curva atual, ou seja, ${sym} não altera a forma.` : ` Curvas finas: família variando ${sym} (${fam.map(F => fmt(F.w, 4)).join('; ')}) com os demais parâmetros fixos; a curva espessa é a atual.`;
+  }
+  if (!S.mystery) series.push({ f: spec.f, c: spec.c, name: spec.nm, tag: refDiff.length ? tagOf(P) : '', strong: true, lab: fam && !coincide ? `<i>${PARAMS[famK].s}</i> = ${fmt(P[famK], 4)} (atual)` : undefined });
+  if (fam && !coincide) { const all = [...fam.map((F, i) => [F.w, series[series.length - 1 - fam.length + i]]), [P[famK], series[series.length - 1]]].sort((a, b) => a[0] - b[0]); all.forEach(([, se], i) => { se.li = i; }); }
+  if (lay && S.part) { pr = particles(m, P, S.rep, spec); if (pr.kind) capX += { tri: ' Pontos: respostas simuladas (cheios, acerto; vazios, erro); quadrados: proporção de acertos em cada faixa de <i>θ</i>.', fd: ' Pontos: estados simulados (cheios, ocupados; vazios, livres); quadrados: fração ocupada em cada nível de energia.', ver: ' Linhas finas irregulares: populações simuladas com ruído demográfico.' }[pr.kind]; }
+  $('#sim-fam').checked = S.fam; $('#sim-part').checked = S.part; $('#sim-anim').checked = S.anim;
+  $('#sim-famopt').hidden = !fam; if (fam) seg('#sim-famk', tableKeys(m).map(k => [k, `<i>${PARAMS[k].s}</i>`]), famK, v => { S.famK = v; renderSim(true); emit('layer', { famK: v }); });
+  $('#sim-partopt').hidden = !(lay && S.part); if (lay && S.part) seg('#sim-partn', [['p', 'Pequena'], ['m', 'Média'], ['g', 'Grande']], S.partN, v => { S.partN = v; renderSim(true); emit('layer', { partN: v }); });
+  const pn = $('#sim-partnote'); pn.hidden = !pr; pn.innerHTML = pr ? pr.note : '';
+  const hl = S.rep === 'logit' || S.rep === 'der' ? [] : (spec.c === 'ver' && S.rep === 'orig' ? [] : [{ y: 1 }]);
+  plot('sim-fig', { model: m, rep: S.rep, pct: m !== 'ver' && (S.rep === 'orig' || S.rep === 'norm'), x: spec.x, y: spec.y, xl: spec.xl, yl: spec.yl, xs: spec.xs, xu: spec.xu, series, hl, ann: annotations(m, P, S.rep), showAnn: S.ann && !S.mystery && !S.noAnn, pts: S.marks || [], layer: pr?.layer, labRule: S.rep === 'der' ? 'ext' : famK === 'c' ? 'left' : 'lvl', morph: S._morph || null });
+  S._morph = null;
+  if (S.probe != null) setCursor('sim-fig', S.probe, true);
+  const pb = $('#sim-probe'); if (pb && document.activeElement !== pb) pb.value = S.probe == null ? '' : fmtIn(S.probe);
+  $('#sim-fig').setAttribute('aria-label', `${MODELS[m].name}: ${spec.yl.replace(/<[^>]+>/g, '')} em função de ${spec.xl.replace(/<[^>]+>/g, '')}`);
+  const solo = !S.mystery && !(S.ref && S.ref.m === m) && !(S.target && S.target.m === m) && !fam && !pr?.layer; // uma curva só: a legenda da figura basta
+  if (solo) $('#sim-legend').innerHTML = ''; else keyItems('#sim-legend', S.mystery ? S.mystery.map(it => ({ c: 'ink', dash: it.dash, t: 'Item ' + it.name })) : [{ c: spec.c, t: `${MODELS[m].name} — ${spec.nm}` }, ...(S.ref && S.ref.m === m ? [{ c: 'ghost', t: 'curva de referência' }] : []), ...(S.target && S.target.m === m ? [{ c: 'ink', dash: '2 5', t: 'curva-alvo' }] : []), ...(fam ? [{ mk: `<line x1="1" x2="35" y1="6" y2="6" stroke="${COL[spec.c]}" stroke-width="1.4" stroke-opacity=".5"/>`, t: `família: variando ${PARAMS[famK].s}` }] : []), ...(pr?.layer ? LAYKEY[pr.kind](COL[spec.c]) : [])]);
+  $('#sim-cap').innerHTML = caption(m, P, spec) + capX;
+  const [e1, e2] = equations(m, P);
+  tex('sim-eq', e1[0], e1[1]); tex('sim-eqn', e2[0], e2[1]);
+  $('#sim-kv').innerHTML = dtable('<b>Tabela 2.</b> Grandezas derivadas', derived(m, P));
+  const ex = explain(m, P, prevP); if (ex) $('#sim-explain').innerHTML = '<span class="h">Efeito da última alteração</span>' + ex;
+  $('#sim-limit').innerHTML = '<span class="h">Limite do modelo</span>' + LIMITS[m];
+  prevP = { ...P };
+  const xs = C.linspace(spec.x[0], spec.x[1], 11);
+  $('#sim-table').innerHTML = `<table class="art"><thead><tr><th>${spec.xl}</th><th>${spec.yl}</th></tr></thead><tbody>${xs.map(x => `<tr><td>${fmt(x, 3)}</td><td>${fmt(spec.f(x), 5)}</td></tr>`).join('')}</tbody></table>`;
+  if (!changed) bindSimCtl();
+  afterRender();
+}
+function bindSimCtl() {
+  const box = $('#sim-ctl');
+  const apply = (el, v) => {
+    const k = el.dataset.k, p = PARAMS[k], max = k === 'N0' ? S.V.K - 1 : p.max, cur = S[MODELS[S.model].key][k];
+    if (el.dataset.num && Number.isFinite(v) && Math.abs(v - cur) < 1e-12) { el.value = fmtIn(cur); return; } // mesmo valor: não redesenha (evita perder o clique seguinte)
+    if (!Number.isFinite(v) || v < p.min || v > max) { $('#sim-alert').textContent = `${p.l} deve ficar entre ${fmt(p.min)} e ${fmt(max)} ${p.u}. O valor não foi aplicado.`; if (el.dataset.num) el.value = fmtIn(cur); return; }
+    if (k === 'K' && S.V.N0 >= v) { $('#sim-alert').textContent = 'K deve ser maior que N₀ no ramo sigmoidal crescente. Reduza N₀ primeiro.'; el.value = el.dataset.num ? fmtIn(S.V.K) : S.V.K; return; }
+    $('#sim-alert').textContent = '';
+    S[MODELS[S.model].key][k] = v;
+    box.querySelectorAll(`[data-k="${k}"]`).forEach(o => { o.value = o.dataset.num ? fmtIn(v) : +v.toPrecision(6); });
+    HILITE = k; box.querySelectorAll('tr[data-p]').forEach(tr => tr.classList.toggle('hi', tr.dataset.p === k));
+    renderSim(true);
+    if (S.model === 'ver' && S.vmode === 'ci') box.querySelector('p.small b').textContent = fmt(effParams('ver').t0, 3) + ' dias';
+    emit('param', { k, v });
+  };
+  box.oninput = e => { const el = e.target; if (el.dataset.k && !el.dataset.num) apply(el, +el.value); };
+  if (!box._num) { box._num = true; numField(box, (el, v) => { if (el.dataset.k) apply(el, v); }); }
+  $('#sim-vmode').onclick = e => { const b = e.target.closest('[data-vm]'); if (b) { if (b.dataset.vm === 'ci') S.V.N0 = Math.max(1, Math.min(S.V.K - 1, Math.round(C.verhulst.N(0, S.V)))); else S.V.t0 = effParams('ver').t0; S.vmode = b.dataset.vm; prevP = null; renderSim(); emit('vmode', { v: S.vmode }); } };
+  $('#sim-vmode').onchange = e => { if (e.target.id === 'fd-zoom') { S.zoom = e.target.checked; renderSim(true); } };
+}
+const PUBLIC_URL = 'https://brunojesuso88.github.io/laboratorio-modelos-logisticos/';
+function configLink() {
+  const P = S[MODELS[S.model].key], q = new URLSearchParams({ m: S.model, rep: S.rep });
+  if (S.model === 'ver') q.set('vm', S.vmode); if (S.model === 'fd') q.set('zoom', S.zoom ? 1 : 0);
+  for (const [k, v] of Object.entries(P)) if (S.model !== 'ver' || k !== (S.vmode === 'curva' ? 'N0' : 't0')) q.set(k, String(v));
+  if (S.fam) q.set('fam', S.famK || FAMDEF[S.model]); if (S.part) q.set('part', S.partN);
+  if (S.probe != null) q.set('x', String(S.probe));
+  if (S.ref && S.ref.m === S.model) { const d = tableKeys(S.model).filter(k => S.ref.P[k] != null && Math.abs(S.ref.P[k] - P[k]) > 1e-12).map(k => `${k}:${S.ref.P[k]}`); if (d.length) q.set('ref', d.join(';')); }
+  return PUBLIC_URL + '?' + q + '#simular';
+}
+function loadConfig() { // aplica ?m=…&rep=…&K=… quando presentes e válidos
+  let q; try { q = new URLSearchParams(location.search); } catch (e) { return; }
+  const m = q.get('m'); if (!m || !MODELS[m]) return;
+  S.model = m; const rp = q.get('rep'); if (['orig', 'norm', 'logit', 'der'].includes(rp)) S.rep = rp;
+  if (m === 'ver' && ['curva', 'ci'].includes(q.get('vm'))) S.vmode = q.get('vm'); if (m === 'fd') S.zoom = q.get('zoom') !== '0';
+  const P = S[MODELS[m].key];
+  for (const k of Object.keys(P)) { const v = parseNum(q.get(k) ?? ''), p = PARAMS[k]; if (p && Number.isFinite(v) && v >= p.min && v <= p.max) P[k] = v; }
+  if (S.V.N0 >= S.V.K) S.V.N0 = Math.max(1, Math.round(S.V.K / 20));
+  const fk = q.get('fam'); if (fk && PARAMS[fk]) { S.fam = true; S.famK = fk; }
+  const pz = q.get('part'); if (PSIZE[pz]) { S.part = true; S.partN = pz; }
+  const xv = parseNum(q.get('x') ?? ''); if (Number.isFinite(xv)) S.probe = xv;
+  const rf = q.get('ref'); // ex.: ref=a:0.5;b:1 → curva de referência com esses valores, demais iguais
+  if (rf) { const RP = { ...effParams(m) }; let ok = false;
+    for (const kv of rf.split(';')) { const [k, v] = kv.split(':'), x = parseNum(v ?? ''), p = PARAMS[k]; if (p && k in RP && Number.isFinite(x) && x >= p.min && x <= p.max) { RP[k] = x; ok = true; } }
+    if (m === 'ver' && S.vmode === 'ci') RP.t0 = C.verhulst.t0FromN0(RP.K, RP.r, Math.min(RP.N0, RP.K - 1));
+    if (ok) S.ref = { m, P: RP }; }
+}
+loadConfig();
+$('#sim-link').onclick = async () => { const u = configLink(), msg = $('#sim-linkmsg'); try { await navigator.clipboard.writeText(u); msg.textContent = 'Link copiado.'; } catch (e) { msg.innerHTML = `Copie: <input class="linkbox" readonly value="${esc(u)}" aria-label="Link desta configuração">`; msg.querySelector('input').select(); } setTimeout(() => { if (msg.textContent === 'Link copiado.') msg.textContent = ''; }, 4000); };
+$('#sim-ann').onchange = e => { S.ann = e.target.checked; renderSim(true); emit('ann'); };
+$('#sim-fam').onchange = e => { S.fam = e.target.checked; renderSim(true); emit('layer', { fam: S.fam }); };
+$('#sim-part').onchange = e => { S.part = e.target.checked; renderSim(true); emit('layer', { part: S.part }); };
+$('#sim-anim').onchange = e => { S.anim = e.target.checked; };
+$('#sim-reroll').onclick = () => { S.seed = S.seed % 9973 + 1; renderSim(true); emit('layer', { seed: S.seed }); };
+$('#sim-pin').onclick = () => { S.ref = { m: S.model, P: effParams(S.model) }; renderSim(true); emit('pin'); };
+$('#sim-unpin').onclick = () => { S.ref = null; renderSim(true); emit('pin'); };
+{ const pb = $('#sim-probe'), go = () => { const v = parseNum(pb.value); S.probe = Number.isFinite(v) ? v : null; setCursor('sim-fig', S.probe); emit('probe', { x: S.probe }); };
+  pb.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } }); pb.addEventListener('change', go); }
+$('#sim-reset').onclick = () => { Object.assign(S, structuredClone(INIT)); S.ref = null; prevP = null; renderSim(); };
+
+// ------------------------------------------------------------ COMPARAR
+const SY = { model: 'i2', mode: 'direta', edit: 'tri', E0: 0.5, lambda: +(C.KB_EV * 300).toFixed(6), a: 1, b: 0, c: 0.2, T: 300, mu: 0.5 };
+let cmpMode = '1';
+function renderCmp() {
+  seg('#cmp-mode', [['1', 'I · Eixos originais'], ['2', 'II · Argumento comum z'], ['3', 'III · Sincronização TRI–FD']], cmpMode, v => { cmpMode = v; renderCmp(); emit('cmp', { v }); });
+  for (const k of ['1', '2', '3']) $('#cmp-' + k).style.display = k === cmpMode ? '' : 'none';
+  const pv = effParams('ver'), pi = effParams('i2'), pf = effParams('fd');
+  if (cmpMode === '1') {
+    const one = (id, m, P, panel) => { const sp = modelSpec(m, P, 'orig'); plot(id, { ...sp, panel, series: [{ f: sp.f, c: sp.c, name: sp.nm }], ann: annotations(m, P, 'orig').filter(a => a.t === 'band' || a.t === 'pt') }); };
+    one('c1-v', 'ver', pv, '(a) Verhulst'); one('c1-t', 'i2', pi, '(b) TRI 2PL'); one('c1-f', 'fd', pf, '(c) Fermi–Dirac');
+    $('#c1-vp').innerHTML = `<i>K</i> = ${fmt(pv.K, 0)}, <i>r</i> = ${fmt(pv.r)} dia<sup>−1</sup>, <i>t</i><sub>0</sub> = ${fmt(pv.t0, 2)} dias`;
+    $('#c1-tp').innerHTML = `<i>a</i> = ${fmt(pi.a)}, <i>b</i> = ${fmt(pi.b)}`;
+    $('#c1-fp').innerHTML = `<i>μ</i> = ${fmt(pf.mu)} eV, <i>T</i> = ${fmt(pf.T, 0)} K`;
+  }
+  if (cmpMode === '2') {
+    const pts = [];
+    for (let t = 0; t <= 30; t += 1.5) { const z = C.verhulst.z(t, pv); if (Math.abs(z) <= 6) pts.push({ x: z, y: C.verhulst.n(t, pv), c: 'ver', s: 'circ' }); }
+    for (let th = -4; th <= 4.001; th += 0.5) { const z = C.irt.z(th, pi); if (Math.abs(z) <= 6) pts.push({ x: z, y: C.irt.P(th, pi), c: 'tri', s: 'sq' }); }
+    const kT = C.KB_EV * pf.T;
+    for (let i = -8; i <= 8; i++) { const E = pf.mu + i * 0.75 * kT, z = C.fermi.z(E, pf); if (Math.abs(z) <= 6) pts.push({ x: z, y: C.fermi.f(E, pf), c: 'fd', s: 'tri' }); }
+    plot('c2', { x: [-6, 6], y: [0, 1.08], xl: 'Argumento adimensional, <i>z</i>', yl: 'Grandeza normalizada (<i>n</i>, <i>P</i> ou <i>f</i>)', xs: 'z', series: [{ f: safe(C.logistic), c: 'ink', name: 'L(z)', w: 1.6 }], pts, hl: [{ y: 1 }],
+      ann: [{ t: 'tan', x: 0, y: 0.5, m: 0.25, half: 2, lb: 'inclinação 1/4' }, { t: 'pt', x: 0, y: 0.5, lb: '(0, 1/2)' }, { t: 'band', x1: -W1090 / 2, x2: W1090 / 2, lb: '10 %–90 %: Δ<i>z</i> = 2 ln 9' }] });
+    $('#c2-legend').innerHTML = `<span><svg viewBox="0 0 36 12"><line x1="1" x2="35" y1="6" y2="6" stroke="var(--ink)" stroke-width="2"/></svg><span><i>L</i>(<i>z</i>)</span></span><span><svg viewBox="0 0 36 12"><circle cx="18" cy="6" r="4.5" fill="var(--bg)" stroke="var(--ver)" stroke-width="2"/></svg><span>Verhulst, <i>n</i>(<i>t</i>)</span></span><span><svg viewBox="0 0 36 12"><rect x="13.5" y="1.5" width="9" height="9" fill="var(--bg)" stroke="var(--tri)" stroke-width="2"/></svg><span>TRI 2PL, <i>P</i>(<i>θ</i>)</span></span><span><svg viewBox="0 0 36 12"><path d="M18 0.5L23.5 11L12.5 11Z" fill="var(--bg)" stroke="var(--fd)" stroke-width="2"/></svg><span>Fermi–Dirac, <i>f</i>(<i>E</i>)</span></span>`;
+    $('#c2-z').innerHTML = `<caption><b>Tabela 4.</b> Argumentos adimensionais com os parâmetros atuais</caption><thead><tr><th>Modelo</th><th>Argumento</th></tr></thead><tbody><tr><td>Verhulst</td><td><i>z</i><sub>V</sub> = <i>r</i>(<i>t</i> − <i>t</i><sub>0</sub>) = ${fmt(pv.r)}(<i>t</i> − ${fmt(pv.t0, 2)})</td></tr><tr><td>TRI 2PL</td><td><i>z</i><sub>TRI</sub> = <i>a</i>(<i>θ</i> − <i>b</i>) = ${fmt(pi.a)}(<i>θ</i> − ${fmt(pi.b)})</td></tr><tr><td>Fermi–Dirac</td><td><i>z</i><sub>F</sub> = (<i>μ</i> − <i>E</i>)/(<i>k</i><sub>B</sub><i>T</i>) = (${fmt(pf.mu)} − <i>E</i>)/${fmt(kT, 5)} eV</td></tr></tbody>`;
+  }
+  if (cmpMode === '3') renderSync();
+  afterRender();
+}
+function syncDerive() {
+  const cfg = { mode: SY.mode, E0: SY.E0, lambda: SY.lambda };
+  if (SY.edit === 'tri') { const a = SY.model === 'rasch' ? 1 : SY.a, r = C.sync.toFermi({ a, b: SY.b }, cfg); return { ...r, a, b: SY.b }; }
+  const r = C.sync.toIRT({ mu: SY.mu, T: SY.T }, cfg); return { a: r.a, b: r.b, mu: SY.mu, T: SY.T };
+}
+const SYB = { a: [0.2, 3], b: [-3, 3], T: [10, 3000], mu: [0, 1] };
+function renderSync(changed) {
+  seg('#c3-model', [['rasch', 'Rasch'], ['i2', '2PL'], ['i3', '3PL']], SY.model, v => { SY.model = v; if (v === 'rasch') SY.edit = 'tri'; renderSync(); emit('sync', { k: 'model' }); });
+  seg('#c3-mode', [['direta', 'Direta: f = P'], ['complementar', 'Complementar: f = 1 − P']], SY.mode, v => { SY.mode = v; SY.mu = syncDerive().mu; renderSync(); emit('sync', { k: 'mode' }); });
+  seg('#c3-edit', SY.model === 'rasch' ? [['tri', 'TRI']] : [['tri', 'TRI'], ['fd', 'Fermi–Dirac']], SY.edit, v => { const d = syncDerive(); Object.assign(SY, { a: d.a, b: d.b, T: d.T, mu: d.mu }); SY.edit = v; renderSync(); emit('sync', { k: 'edit' }); });
+  const d = syncDerive(), tri = SY.edit === 'tri';
+  if (!changed) {
+    const rows = [];
+    if (SY.model !== 'rasch') rows.push({ k: 'a', v: d.a, locked: !tri });
+    rows.push({ k: 'b', v: d.b, locked: !tri });
+    if (SY.model === 'i3') rows.push({ k: 'c', v: SY.c });
+    rows.push({ k: 'T', v: d.T, locked: tri }, { k: 'mu', v: d.mu, locked: tri, min: 0, max: 1 });
+    $('#c3-ctl').innerHTML = ptable('<b>Tabela 5.</b> Parâmetros da sincronização', rows, 'sy');
+    $('#c3-ctl2').innerHTML = ptable('Escala da transformação', [{ k: 'E0', v: SY.E0, s: 1 }, { k: 'lambda', v: SY.lambda, s: 1 }], 'sy');
+    bindHilite($('#c3-ctl'), ['c3-a', 'c3-b']); bindHilite($('#c3-ctl2'), ['c3-a', 'c3-b']);
+  } else {
+    for (const k of ['a', 'b', 'T', 'mu']) { const locked = tri === (k === 'T' || k === 'mu'); if (locked) $('#c3-ctl').querySelectorAll(`[data-k="${k}"]`).forEach(o => o.value = o.dataset.num ? fmtIn(d[k]) : +d[k].toPrecision(6)); }
+  }
+  const cfg = { mode: SY.mode, E0: SY.E0, lambda: SY.lambda }, c = SY.model === 'i3' ? SY.c : 0;
+  const ip = { a: d.a, b: d.b, c }, fp = { mu: d.mu, T: d.T }, kT = C.KB_EV * d.T;
+  const fOfTheta = safe(th => C.fermi.f(C.sync.energy(th, cfg), fp));
+  const s1 = [{ f: safe(th => C.irt.P(th, ip)), c: 'tri', name: c ? 'P₃(θ)' : 'P(θ)' }];
+  if (c) s1.push({ f: safe(th => C.irt.q(th, ip)), c: 'ink', name: 'q(θ)', dash: '1.5 4', w: 2 });
+  s1.push({ f: fOfTheta, c: 'fd', name: 'f(E(θ))', mk: 'tri', mkN: 15 });
+  const Ea = C.sync.energy(-4, cfg), Eb = C.sync.energy(4, cfg), wθ = W1090 / d.a;
+  plot('c3-a', { panel: '(a) Escala da TRI', x: [-4, 4], y: [0, 1.08], xl: 'Proficiência, <i>θ</i>', yl: 'Probabilidade ou ocupação', xs: 'θ', series: s1, hl: [{ y: 1 }],
+    ann: [{ t: 'band', x1: d.b - wθ / 2, x2: d.b + wθ / 2, p: 'a T lambda', lb: '10 %–90 %' }, { t: 'v', x: d.b, y: SY.mode === 'direta' ? 0.5 : 0.5, p: 'b mu E0', lb: '<i>b</i>' }, ...(c ? [{ t: 'hband', y1: 0, y2: c, p: 'c', lb: '<i>c</i>' }] : [])],
+    link: { id: 'c3-b', map: th => C.sync.energy(th, cfg) }, extra: th => `<i>E</i>(<i>θ</i>) = ${fmt(C.sync.energy(th, cfg), 4)} eV` });
+  keyItems('#c3a-legend', [{ c: 'tri', t: c ? 'TRI 3PL, <i>P</i>' : 'TRI, <i>P</i>(<i>θ</i>)' }, ...(c ? [{ c: 'ink', dash: '1 4', t: '<i>q</i> = (<i>P</i> − <i>c</i>)/(1 − <i>c</i>)' }] : []), { c: 'fd', mk: '<path d="M18 0.5L23.5 11L12.5 11Z" fill="var(--bg)" stroke="var(--fd)" stroke-width="1.8"/>', t: 'Fermi–Dirac transformada, <i>f</i>(<i>E</i>(<i>θ</i>))' }]);
+  plot('c3-b', { panel: '(b) Escala de energia', x: [Math.min(Ea, Eb), Math.max(Ea, Eb)], y: [0, 1.08], xl: 'Energia, <i>E</i> (eV)', yl: 'Ocupação média, <i>f</i>', xs: 'E', xu: 'eV', series: [{ f: safe(E => C.fermi.f(E, fp)), c: 'fd', name: 'f(E)' }], hl: [{ y: 1 }],
+    ann: [{ t: 'band', x1: d.mu - W1090 * kT / 2, x2: d.mu + W1090 * kT / 2, p: 'T a lambda', lb: '4,39 <i>k</i><sub>B</sub><i>T</i>' }, { t: 'v', x: d.mu, y: 0.5, p: 'mu b E0', lb: '<i>μ</i>' }, { t: 'pt', x: d.mu, y: 0.5, p: 'mu b', lb: '' }],
+    link: { id: 'c3-a', map: E => C.sync.theta(E, cfg) }, extra: E => `<i>θ</i>(<i>E</i>) = ${fmt(C.sync.theta(E, cfg), 4)}` });
+  keyItems('#c3b-legend', [{ c: 'fd', t: `<i>f</i>(<i>E</i>), <i>T</i> = ${fmt(d.T, 1)} K, <i>μ</i> = ${fmt(d.mu, 4)} eV` }]);
+  const sg = SY.mode === 'direta' ? '-' : '+', sgh = SY.mode === 'direta' ? '−' : '+';
+  const concl = SY.mode === 'direta' ? (c ? 'P=c+(1-c)\\,f' : 'f\\big(E(\\theta)\\big)=P(\\theta)') : (c ? 'q=1-f' : 'f\\big(E(\\theta)\\big)=1-P(\\theta)');
+  tex('c3-eq', `\\begin{gathered}E=E_0${sg}\\lambda\\theta,\\quad \\mu=E_0${sg}\\lambda b,\\quad T=\\dfrac{\\lambda}{a\\,k_B}\\\\ \\Longrightarrow\\quad ${concl}\\end{gathered}`, `${V('E')} = ${V('E')}<sub>0</sub> ${sgh} ${V('λθ')}, ${V('μ')} = ${V('E')}<sub>0</sub> ${sgh} ${V('λb')}, ${V('T')} = ${V('λ')}/(${V('a')}${V('k')}<sub>B</sub>)`);
+  const th = 1, Pv = c ? C.irt.q(th, ip) : C.irt.P(th, ip), fv = fOfTheta(th), Pn = c ? '<i>q</i>(1)' : '<i>P</i>(1)';
+  $('#c3-kv').innerHTML = dtable('<b>Tabela 6.</b> Valores vinculados e verificação', [['Temperatura vinculada (formal)', V('λ') + '/(' + V('a') + V('k') + '<sub>B</sub>)', fmt(d.T, 1) + ' K'], ['Potencial químico vinculado', V('E') + '<sub>0</sub> ' + sgh + ' ' + V('λb'), fmt(d.mu, 4) + ' eV'], ['Parâmetros da TRI', V('a') + ' · ' + V('b'), fmt(d.a, 3) + ' · ' + fmt(d.b, 3)], [`Verificação em <i>θ</i> = 1`, `${Pn} | <i>f</i>(<i>E</i>(1))`, `${fmt(Pv, 6)} | ${fmt(fv, 6)}`]]);
+  $('#c3-cap').innerHTML = `<b>Figura 4.</b> Sincronização ${SY.mode} entre a TRI ${SY.model === 'rasch' ? '(Rasch)' : SY.model === 'i2' ? '(2PL)' : '(3PL)'} e Fermi–Dirac. (a) Na escala de proficiência, a ocupação transformada <i>f</i>(<i>E</i>(<i>θ</i>)) ${SY.mode === 'direta' ? (c ? 'coincide com a curva normalizada <i>q</i>' : 'coincide com <i>P</i>(<i>θ</i>)') : (c ? 'é o complemento de <i>q</i>' : 'é o complemento 1 − <i>P</i>(<i>θ</i>)')}. (b) A mesma ocupação na escala de energia, com <i>T</i> = ${fmt(d.T, 1)} K e <i>μ</i> = ${fmt(d.mu, 4)} eV. Os cursores das duas figuras estão vinculados pela transformação <i>E</i> = <i>E</i><sub>0</sub> ${sgh} <i>λθ</i>, com <i>λ</i> = ${fmt(SY.lambda * 1000, 2)} meV por unidade de <i>θ</i>.`;
+  $('#c3-explain').innerHTML = '<span class="h">Leitura</span>' + (tri
+    ? `Editando pela TRI: ${V('T')} e ${V('μ')} são calculados. Aumentar ${V('a')} com ${V('λ')} fixo <b>reduz</b> ${V('T')}; aumentar ${V('b')} ${SY.mode === 'direta' ? '<b>reduz</b>' : '<b>eleva</b>'} ${V('μ')}. O valor de ${V('T')} depende inteiramente da escala ${V('λ')} escolhida — por isso não é uma temperatura da aprendizagem.`
+    : `Editando por Fermi–Dirac: ${V('a')} = ${V('λ')}/(${V('k')}<sub>B</sub>${V('T')}) e ${V('b')} = ${SY.mode === 'direta' ? '(E₀ − μ)/λ' : '(μ − E₀)/λ'} são calculados. Aumentar ${V('T')} alarga a transição e corresponde a um item menos discriminativo.`)
+    + (c ? ` No 3PL a curva normalizada <i>q</i> (pontilhada) coincide com ${SY.mode === 'direta' ? '<i>f</i>' : '1 − <i>f</i>'}; a probabilidade original <i>P</i> fica acima dela, com assíntota inferior <i>c</i>.` : '');
+  bindSync();
+  afterRender();
+}
+function bindSync() {
+  const apply = (el, v) => {
+    const k = el.dataset.k || el.dataset.s, old = { ...SY };
+    if (el.dataset.num && Number.isFinite(v) && Math.abs(v - SY[k]) < 1e-12) { el.value = fmtIn(SY[k]); return; }
+    if (!Number.isFinite(v)) { $('#c3-alert').textContent = 'Digite um número.'; if (el.dataset.num) el.value = fmtIn(SY[k]); return; }
+    SY[k] = v;
+    let d; try { d = syncDerive(); } catch (er) { Object.assign(SY, old); $('#c3-alert').textContent = er.message; return; }
+    const out = Object.entries(SYB).find(([q, [lo, hi]]) => d[q] < lo - 1e-9 || d[q] > hi + 1e-9);
+    if (out) {
+      Object.assign(SY, old); el.value = el.dataset.num ? fmtIn(old[k]) : old[k];
+      $('#c3-alert').textContent = `A alteração levaria ${out[0] === 'mu' ? 'μ' : out[0]} a ${fmt(d[out[0]], 4)}, fora do intervalo permitido (${fmt(out[1][0])} a ${fmt(out[1][1])}). Ela não foi aplicada — não há truncamento silencioso. Ajuste λ ou E₀ para ampliar a faixa.`;
+      return;
+    }
+    $('#c3-alert').textContent = '';
+    document.querySelectorAll(`#c3-ctl [data-k="${k}"],#c3-ctl [data-s="${k}"],#c3-ctl2 [data-s="${k}"]`).forEach(o => { o.value = o.dataset.num ? fmtIn(v) : +v.toPrecision(6); });
+    renderSync(true);
+    emit('sync', { k });
+  };
+  for (const id of ['#c3-ctl', '#c3-ctl2']) {
+    const box = $(id);
+    box.oninput = e => { const el = e.target; if ((el.dataset.k || el.dataset.s) && !el.dataset.num) apply(el, +el.value); };
+    if (!box._num) { box._num = true; numField(box, (el, v) => { if (el.dataset.k || el.dataset.s) apply(el, v); }); }
+  }
+}
+$('#c3-l300').onclick = () => { const old = SY.lambda; SY.lambda = +(C.KB_EV * 300).toFixed(6); const d = syncDerive(); if (Object.entries(SYB).some(([q, [lo, hi]]) => d[q] < lo || d[q] > hi)) { SY.lambda = old; $('#c3-alert').textContent = 'Com essa escala os parâmetros vinculados sairiam do intervalo permitido.'; return; } renderSync(); };
+
+// ------------------------------------------------------------ APRENDER
+const ACTS = [
+  { lvl: 'n', t: 'A curva em S', set: { model: 'i2', rep: 'orig', I2: { a: 1, b: 0 } }, intro: `As três situações usam a função logística ${V('L')}(${V('z')}) = 1/(1 + e<sup>−${V('z')}</sup>). Ela vale 0 muito à esquerda, 1 muito à direita e cresce mais rápido no centro.`,
+    q: `Prever: qual é o valor de ${V('L')}(0) e qual a inclinação da curva nesse ponto?`, o: [['0,5 e 1/4', 1, `Isso. ${V('L')}(0) = 1/2 e ${V('L')}′(0) = ${V('L')}(1 − ${V('L')}) = 1/4. Esse ponto é o centro de simetria e o ponto de inflexão.`], ['0 e 1', 0, `Ainda não. Substitua ${V('z')} = 0: e<sup>0</sup> = 1, logo ${V('L')}(0) = 1/(1 + 1). A inclinação máxima é ${V('L')}(1 − ${V('L')}) no centro.`], ['1 e 1/2', 0, `O valor 1 só é atingido no limite ${V('z')} → +∞. No simulador, passe o cursor sobre o centro da curva e confira.`]],
+    j: 'Justificar: por que o ponto central também é o ponto em que a curva é mais íngreme?' },
+  { lvl: 'n', t: 'Verhulst: crescimento limitado', set: { model: 'ver', rep: 'orig', vmode: 'curva', V: { K: 1000, r: 0.5, t0: 6, N0: 50 } }, intro: `Uma população cresce quase exponencialmente no início e desacelera ao se aproximar da capacidade de suporte ${V('K')}. A solução é ${V('N')}(${V('t')}) = ${V('K')}·${V('L')}[${V('r')}(${V('t')} − ${V('t')}<sub>0</sub>)].`,
+    q: `Prever: no modo “Curva”, se você dobrar ${V('r')}, o que acontece com o instante central ${V('t')}<sub>0</sub> e com a inclinação máxima?`, o: [[`${V('t')}<sub>0</sub> fica igual e a inclinação máxima dobra`, 1, `Correto. Neste modo ${V('t')}<sub>0</sub> é um parâmetro independente; a inclinação central é ${V('r')}${V('K')}/4. No modo “Condição inicial”, porém, ${V('t')}<sub>0</sub> mudaria. Teste os dois.`], [`${V('t')}<sub>0</sub> diminui pela metade`, 0, `Isso só acontece quando se mantém ${V('N')}<sub>0</sub> fixo (modo “Condição inicial”), porque ${V('t')}<sub>0</sub> = ln[(${V('K')} − ${V('N')}<sub>0</sub>)/${V('N')}<sub>0</sub>]/${V('r')}. No modo “Curva”, ${V('t')}<sub>0</sub> não muda.`], [`${V('K')} dobra`, 0, `${V('K')} é a capacidade de suporte: não depende de ${V('r')}. Fixe uma referência, dobre ${V('r')} e compare as assíntotas.`]],
+    j: `Justificar: por que ${V('n')} = ${V('N')}/${V('K')} não deve ser lida como uma probabilidade?` },
+  { lvl: 'n', t: 'TRI: dificuldade e discriminação', set: { model: 'i2', rep: 'orig', I2: { a: 1.2, b: 0 } }, intro: `Na TRI de dois parâmetros, ${V('P')}(${V('θ')}) = ${V('L')}[${V('a')}(${V('θ')} − ${V('b')})]. ${V('b')} localiza o item na escala de proficiência; ${V('a')} controla quão abrupta é a transição.`,
+    q: `Prever: um item com ${V('b')} = 1,5 em vez de ${V('b')} = 0 é mais fácil ou mais difícil? Para onde se desloca a curva?`, o: [['Mais difícil; desloca-se para a direita', 1, `Isso. É preciso proficiência maior para chegar a ${V('P')} = 0,5. A forma da curva não muda, pois ${V('a')} é o mesmo.`], ['Mais fácil; desloca-se para a esquerda', 0, `Observe o ponto ${V('P')} = 0,5: ele fica em ${V('θ')} = ${V('b')}. Aumentar ${V('b')} exige mais proficiência.`], ['A curva fica mais íngreme', 0, `A inclinação depende de ${V('a')}, não de ${V('b')}. Mude só ${V('b')} com uma referência fixada.`]],
+    j: 'Justificar: por que o item com maior a separa melhor estudantes de proficiências próximas?' },
+  { lvl: 'n', t: 'Fermi–Dirac: ocupação e temperatura', set: { model: 'fd', rep: 'orig', F: { mu: 0.5, T: 300 } }, intro: `A ocupação média de um estado quântico é ${V('f')}(${V('E')}) = 1/[1 + e<sup>(${V('E')} − ${V('μ')})/(${V('k')}<sub>B</sub>${V('T')})</sup>]. Ela decresce com a energia: estados de baixa energia tendem a estar ocupados.`,
+    q: `Prever: mantendo ${V('μ')} fixo, aumente ${V('T')}. O que acontece com ${V('f')} em ${V('E')} = ${V('μ')} e em ${V('E')} abaixo de ${V('μ')}?`, o: [[`Em ${V('E')} = ${V('μ')} continua 0,5; abaixo de ${V('μ')}, diminui`, 1, `Exato. ∂${V('f')}/∂${V('T')} = (${V('E')} − ${V('μ')})/(${V('k')}<sub>B</sub>${V('T')}²)·${V('f')}(1 − ${V('f')}) é negativo para ${V('E')} < ${V('μ')}. A transição alarga, mas o centro não se move.`], [`Aumenta em todas as energias`, 0, `Veja o sinal de ${V('E')} − ${V('μ')} na derivada em relação a ${V('T')}: ele muda ao cruzar ${V('μ')}.`], [`O centro se desloca para a direita`, 0, `O centro é sempre ${V('E')} = ${V('μ')}. Aqui ${V('μ')} está fixo; num gás real com número de partículas fixo, ${V('μ')} dependeria de ${V('T')}.`]],
+    j: 'Justificar: o que significa fisicamente uma transição em degrau quando T → 0⁺?' },
+  { lvl: 'n', t: 'Uma mesma curva?', set: { cmp: '2' }, intro: 'No módulo Comparar, modo II, as três curvas são desenhadas contra o argumento adimensional z. Os pontos de cada modelo caem sobre a mesma curva L(z).',
+    q: 'Avaliar: um texto afirma que os três fenômenos “funcionam do mesmo jeito porque têm vagas livres que vão sendo preenchidas”. Essa conclusão é válida?', o: [['Não: a igualdade é da estrutura matemática, não do mecanismo', 1, 'Correto. Verhulst vem de uma hipótese de crescimento dependente da densidade, a TRI é uma escolha de modelagem psicométrica e Fermi–Dirac decorre da estatística de férmions com exclusão de Pauli. A analogia das “vagas” só tem base física no último caso.'], ['Sim: curvas iguais implicam o mesmo mecanismo', 0, 'Funções iguais podem descrever fenômenos com origens diferentes. Compare a Tabela 3 do módulo Comparar.'], ['Sim, mas só para Verhulst e Fermi–Dirac', 0, 'Na equação de Verhulst o termo (1 − N/K) é uma hipótese fenomenológica sobre recursos, não um princípio de exclusão. Não há “vagas” no sentido quântico.']],
+    j: 'Justificar: que parte da analogia é útil para ensinar, e qual parte deve ser explicitamente recusada?' },
+  { lvl: 'a', t: 'TRI 3PL: o ponto de 50%', set: { model: 'i3', rep: 'orig', I3: { a: 1.2, b: 0, c: 0.2 } }, intro: `O 3PL acrescenta a assíntota inferior ${V('c')}: ${V('P')} = ${V('c')} + (1 − ${V('c')})·${V('L')}[${V('a')}(${V('θ')} − ${V('b')})].`,
+    q: `Prever: com ${V('c')} = 0,2, quanto vale ${V('P')} em ${V('θ')} = ${V('b')}?`, o: [['0,6', 1, `Correto: (1 + ${V('c')})/2 = 0,6. Em ${V('θ')} = ${V('b')} está o ponto de inflexão, mas não o de 50%. Só a curva normalizada ${V('q')} = (${V('P')} − ${V('c')})/(1 − ${V('c')}) vale 0,5 ali.`], ['0,5', 0, `Isso vale no Rasch e no 2PL. No 3PL, substitua ${V('L')}(0) = 1/2: ${V('c')} + (1 − ${V('c')})/2.`], ['0,2', 0, `0,2 é a assíntota inferior, atingida só para ${V('θ')} → −∞.`]],
+    j: 'Justificar: por que, no 3PL, só a curva normalizada pode ser comparada diretamente com Fermi–Dirac?' },
+  { lvl: 'a', t: 'Sincronização: discriminação e “temperatura”', set: { cmp: '3' }, intro: `Com ${V('E')} = ${V('E')}<sub>0</sub> − ${V('λ')}${V('θ')} e ${V('μ')} = ${V('E')}<sub>0</sub> − ${V('λ')}${V('b')}, a ocupação transformada coincide com ${V('P')}(${V('θ')}) se ${V('T')} = ${V('λ')}/(${V('a')}${V('k')}<sub>B</sub>).`,
+    q: `Prever: com ${V('λ')} fixo, um item mais discriminativo (maior ${V('a')}) corresponde a ${V('T')} maior ou menor?`, o: [[`Menor: ${V('T')} = ${V('λ')}/(${V('a')}${V('k')}<sub>B</sub>)`, 1, `Correto. Transição abrupta corresponde a baixa “temperatura”. Mas mude ${V('λ')}: o mesmo ${V('a')} passa a corresponder a outro ${V('T')}. O número depende da escala escolhida — não existe uma temperatura da aprendizagem.`], [`Maior`, 0, `Compare as inclinações centrais: ${V('a')}/4 na TRI e 1/(4${V('k')}<sub>B</sub>${V('T')}) em Fermi–Dirac. Mais inclinação exige ${V('T')} menor.`], [`Não depende de ${V('a')}`, 0, `Mova ${V('a')} no modo III editando pela TRI e observe o valor vinculado de ${V('T')}.`]],
+    j: 'Justificar: por que o valor de T exibido não pode ser interpretado como medida de algo no processo de aprendizagem?' },
+  { lvl: 'a', t: 'Logit: retas paralelas no Rasch', set: { model: 'rasch', rep: 'logit', R: { b: 0 } }, intro: `A transformação logit, ln[${V('p')}/(1 − ${V('p')})], transforma a curva logística numa reta: logit ${V('P')} = ${V('θ')} − ${V('b')} no Rasch.`,
+    q: `Prever: no gráfico logit, dois itens Rasch com dificuldades diferentes geram retas…`, o: [['paralelas, com inclinação 1', 1, 'Correto. No Rasch todos os itens têm a mesma inclinação; só o intercepto muda. Fixe uma referência, mude b e confira. No 2PL as inclinações seriam a.'], ['que se cruzam em θ = 0', 0, 'Retas com a mesma inclinação não se cruzam. Experimente no simulador com uma referência fixada.'], ['curvas em S', 0, 'Na representação logit a curva em S vira reta. Troque a representação para “Logit”.']],
+    j: 'Justificar: por que a igualdade de inclinações é uma exigência de mensuração no modelo de Rasch, e não apenas uma simplificação?' },
+];
+let aLvl = 'n', aIdx = 0; const done = new Set();
+function renderApr() {
+  seg('#apr-level', [['n', 'Núcleo obrigatório'], ['a', 'Núcleo + aprofundamento']], aLvl, v => { aLvl = v; aIdx = 0; renderApr(); });
+  const list = ACTS.filter(a => a.lvl === 'n' || aLvl === 'a');
+  aIdx = Math.min(aIdx, list.length - 1);
+  $('#apr-steps').innerHTML = list.map((a, i) => `<button type="button" data-i="${i}" ${i === aIdx ? 'aria-current="step"' : ''} class="${done.has(a.t) ? 'done' : ''}">${i + 1}. ${a.t}</button>`).join('');
+  $('#apr-steps').onclick = e => { const b = e.target.closest('button'); if (b) { aIdx = +b.dataset.i; renderApr(); } };
+  const a = list[aIdx];
+  $('#apr-card').innerHTML = `<span class="tag ui">${a.lvl === 'n' ? 'Núcleo' : 'Aprofundamento'}</span><h3>Atividade ${aIdx + 1}. ${a.t}</h3><p>${a.intro}</p>
+  <p class="phase">1 · Prever</p><p>${a.q}</p><div class="opts">${a.o.map((o, i) => `<button type="button" data-o="${i}">${String.fromCharCode(97 + i)}) ${o[0]}</button>`).join('')}</div><div class="fb" id="apr-fb" aria-live="polite"></div>
+  <p class="phase">2 · Simular</p><button class="btn pri ui" type="button" id="apr-go">Abrir no ${a.set.cmp ? 'módulo Comparar' : 'simulador'} com esta configuração</button>
+  <p class="phase">3 · Justificar</p><p>${a.j}</p><label class="sr" for="apr-j">Sua justificativa</label><textarea id="apr-j" style="min-height:90px" placeholder="Escreva sua justificativa"></textarea>
+  <p class="phase">4 · Avaliar</p><p class="small mute">Compare sua justificativa com o retorno da etapa 1 e com a Tabela 3 do módulo Comparar.</p>`;
+  $('#apr-card').querySelector('.opts').onclick = e => {
+    const b = e.target.closest('button'); if (!b) return; const o = a.o[+b.dataset.o];
+    b.classList.add(o[1] ? 'right' : 'wrong'); $('#apr-fb').innerHTML = o[2]; if (o[1]) { done.add(a.t); $('#apr-steps').children[aIdx]?.classList.add('done'); }
+  };
+  $('#apr-go').onclick = () => {
+    if (a.set.cmp) { cmpMode = a.set.cmp; location.hash = 'comparar'; return; }
+    Object.assign(S, structuredClone(a.set)); S.ref = null; prevP = null; location.hash = 'simular'; renderSim();
+  };
+}
+
+// ------------------------------------------------------------ PLANEJAR
+const PLANS = [
+  { id: 'r1', t: 'Uma mesma curva: crescimento populacional e probabilidade', pub: 'Professores de Biologia, Matemática e Física (formação continuada)', dur: '2 aulas de 50 min', obj: ['Reconhecer a função logística em contextos de Biologia e de avaliação', 'Interpretar K, r e t₀ e relacioná-los com a e b', 'Distinguir correspondência matemática de semelhança de fenômenos'], steps: [['Prever', 'Discutir em grupos como cresce uma população de bactérias num meio limitado. Esboçar a curva.'], ['Simular', 'Simular → Verhulst. Variar K, r e t₀ registrando o efeito de cada um. Fixar referências.'], ['Simular', 'Simular → TRI 2PL. Variar a e b. Montar uma tabela de correspondência K ↔ ?, r ↔ a, t₀ ↔ b.'], ['Justificar', 'Comparar → Modo II. Explicar por que os pontos caem na mesma curva.'], ['Avaliar', 'Responder: o que NÃO se transfere de Verhulst para a TRI? (tabela de limites)']], adapt: 'Para o Ensino Médio, use apenas Verhulst e a representação original; omita o logit.' },
+  { id: 'r2', t: 'Temperatura e discriminação: lendo inclinações', pub: 'Licenciandos em Física e professores de Física', dur: '2 aulas de 50 min', obj: ['Deduzir a inclinação central de f(E) e de P(θ)', 'Relacionar a com 1/(k_BT) por meio da escala λ', 'Criticar a ideia de “temperatura da aprendizagem”'], steps: [['Prever', 'Como a inclinação de f(E) em E = μ depende de T? Escrever a previsão.'], ['Simular', 'Simular → Fermi–Dirac, representação Derivada. Variar T e medir a inclinação central.'], ['Simular', 'Comparar → Modo III. Editar pela TRI e observar T vinculado; depois mudar λ.'], ['Justificar', 'Explicar por que o mesmo a corresponde a temperaturas diferentes quando λ muda.'], ['Avaliar', 'Redigir um parágrafo sobre o alcance e os limites da analogia.']], adapt: 'Para turmas sem cálculo, substitua a derivada pela largura 10%–90% exibida no painel.' },
+  { id: 'r3', t: 'Até onde vai a analogia?', pub: 'Formação inicial de professores de Ciências da Natureza', dur: '1 aula de 50 min', obj: ['Mapear semelhanças estruturais entre modelos', 'Identificar onde a analogia falha', 'Planejar o uso crítico de analogias em sala'], steps: [['Prever', 'Ler o texto das “vagas livres” e marcar o que parece verdadeiro.'], ['Simular', 'Aprender → atividade 5 e Comparar → Modo II.'], ['Justificar', 'Preencher uma tabela: semelhança matemática × diferença de mecanismo para cada modelo.'], ['Avaliar', 'Reescrever o texto das “vagas livres” corrigindo-o.']], adapt: 'Em turmas de Biologia, aprofunde o significado de K e de r com dados reais de populações.' },
+  { id: 'r4', t: 'Como a TRI lê um item de prova', pub: 'Professores da educação básica que trabalham com avaliações externas', dur: '1 aula de 50 min', obj: ['Interpretar a, b e c de um item', 'Entender por que no 3PL b não é o ponto de 50%', 'Ler a informação do item'], steps: [['Prever', 'Um item com muito “chute”: como fica a curva para estudantes de baixa proficiência?'], ['Simular', 'Simular → TRI 3PL. Variar c e observar P em θ = b.'], ['Simular', 'Representação Normalizada: comparar P e q.'], ['Justificar', 'Explicar a diferença entre ponto de inflexão e ponto de 50%.'], ['Avaliar', 'Classificar três itens fictícios pela discriminação e pela dificuldade.']], adapt: 'Use itens fictícios; os parâmetros do simulador não foram estimados a partir de dados reais.' },
+];
+let pId = 'r1';
+const planText = p => `${p.t}\nPúblico: ${p.pub}\nDuração: ${p.dur}\n\nObjetivos:\n${p.obj.map(o => '- ' + o).join('\n')}\n\nEtapas:\n${p.steps.map((s, i) => `${i + 1}. ${s[0]}: ${s[1]}`).join('\n')}\n\nAdaptação sugerida: ${p.adapt}`;
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } } };
+function renderPln() {
+  seg('#pln-pick', PLANS.map((p, i) => [p.id, `Roteiro ${i + 1}`]), pId, v => { pId = v; renderPln(); });
+  const p = PLANS.find(x => x.id === pId);
+  $('#pln-card').innerHTML = `<h3>${p.t}</h3><p class="ui"><span class="tag">${esc(p.dur)}</span></p><p><b>Público.</b> ${p.pub}</p><p class="phase">Objetivos</p><ul>${p.obj.map(o => `<li>${o}</li>`).join('')}</ul><p class="phase">Sequência investigativa</p><ol>${p.steps.map(s => `<li><b>${s[0]}.</b> ${s[1]}</li>`).join('')}</ol><p class="note"><span class="h">Adaptação</span>${p.adapt}</p>`;
+  $('#pln-text').value = store.get('lml-' + pId) ?? planText(p);
+  $('#pln-status').textContent = '';
+}
+$('#pln-text').oninput = e => { if (!store.set('lml-' + pId, e.target.value)) $('#pln-status').textContent = 'Este navegador não permite salvar o rascunho; copie o texto antes de sair.'; };
+$('#pln-restore').onclick = () => { $('#pln-text').value = planText(PLANS.find(x => x.id === pId)); store.set('lml-' + pId, $('#pln-text').value); $('#pln-status').textContent = 'Modelo restaurado.'; };
+$('#pln-copy').onclick = async () => { try { await navigator.clipboard.writeText($('#pln-text').value); $('#pln-status').textContent = 'Roteiro copiado.'; } catch (e) { $('#pln-text').select(); $('#pln-status').textContent = 'Não foi possível copiar automaticamente: o texto foi selecionado, use Ctrl+C.'; } };
+
+// ============================================================ MODO TUTORIAL (v2.0)
+// Motor genérico de passos + catálogo de 6 fases, 27 missões e 5 desafios.
+// Roda no mesmo escopo do app: usa S, SY, C, renderSim, renderCmp, setCursor, effParams, emit/afterRender.
+const TUTOR = { nome: 'Prof. Gelado', sigla: 'PG' };
+const BADGES = { L1: 'Leitor de limites', L2: 'Caçador de centros', L3: 'Medidor de inclinações', L4: 'Agrimensor de transições', L5: 'Endireitador de curvas', L6: 'Crítico de analogias' };
+const BADGE_DESC = { L1: 'Leitura 1 — teto e piso', L2: 'Leitura 2 — centro', L3: 'Leitura 3 — inclinação central', L4: 'Leitura 4 — largura da transição', L5: 'Leitura 5 — forma linearizada', L6: 'Leitura 6 — limite da analogia' };
+const TKEY = 'lml-tutorial-v1';
+const REDUCED = (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })();
+function tload() { try { const d = JSON.parse(localStorage.getItem(TKEY)); if (d && d.v === 1) return d; } catch (e) { } return { v: 1, done: {}, badges: [], notes: [], resume: null, free: '', unlockAll: false }; }
+const TS = { on: false, ph: 0, i: 0, st: 'idle', base: null, cur: { id: null, x: null }, hint: 0, idle: null, hold: null, ch: null, bet: null, skipped: false, data: tload() };
+function tsave() { try { localStorage.setItem(TKEY, JSON.stringify(TS.data)); } catch (e) { } }
+const n2 = (x, d = 2) => fmt(x, d);
+const rnd = (a, b, step) => Math.round((a + Math.random() * (b - a)) / step) * step;
+const shuffle = a => { const r = a.slice(); for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; };
+
+// ------------------------------------------------------------ ações auxiliares
+function goView(v) { if (location.hash.slice(1) !== v) history.replaceState(null, '', '#' + v); route(); }
+function simPrep(o) {
+  Object.assign(S, { ref: null, target: null, mystery: null, marks: null, noAnn: false });
+  prevP = null; Object.assign(S, structuredClone(o)); document.body.classList.remove('tut-noparams');
+  goView('simular'); renderSim();
+}
+function syncReset() { Object.assign(SY, { model: 'i2', mode: 'direta', edit: 'tri', E0: 0.5, lambda: +(C.KB_EV * 300).toFixed(6), a: 1, b: 0, c: 0.2, T: 300, mu: 0.5 }); }
+function inputFor(k) { return document.querySelector(`#sim-ctl input[data-k="${k}"][data-num], #c3-ctl input[data-k="${k}"][data-num], #c3-ctl2 input[data-s="${k}"][data-num]`); }
+function setVal(k, v) { const el = inputFor(k); if (!el) return; el.value = fmtIn(v); el.dispatchEvent(new Event('change', { bubbles: true })); }
+function animateTo(k, to) { // demonstração do nível 3 de dica: o tutor move o controle "em câmera lenta"
+  const el = inputFor(k); if (!el) return; const from = parseNum(el.value);
+  if (REDUCED) { setVal(k, to); return; }
+  let i = 0; const n = 14, tick = () => { i++; setVal(k, +(from + (to - from) * i / n).toPrecision(6)); if (i < n) setTimeout(tick, 55); }; tick();
+}
+function cursorTo(id, x) { const f = document.getElementById(id); if (f) f.focus({ preventScroll: true }); setCursor(id, x); }
+const click = sel => { const el = document.querySelector(sel); if (el) el.click(); };
+
+// ------------------------------------------------------------ catálogo
+const PHASES = [
+  { id: 0, t: 'O laboratório', dur: 3, desc: 'Figura, tabela de parâmetros e geometria das curvas.', view: 'simular',
+    prep: () => simPrep({ model: 'ver', rep: 'orig', vmode: 'curva', ann: true, zoom: true, V: { ...INIT.V } }),
+    m: [
+      { id: '0.1', t: 'A figura', alvo: '#sim-fig', libera: { m: ['ver'], r: ['orig'] }, tipo: 'cursor',
+        fala: 'Esta é a <b>Figura 1</b>. Passe o cursor sobre a curva — ou clique nela e use as setas ← → — e leia os valores no quadro.',
+        cx: { id: 'sim-fig', alvo: () => null, tol: Infinity }, hold: 1000,
+        dicas: ['Leve o ponteiro do mouse para dentro da área do gráfico.', 'Clique na figura e pressione a seta → algumas vezes.', () => cursorTo('sim-fig', 10)],
+        ret: 'O quadro de leitura mostra o tempo <i>t</i> e a população <i>N</i>(<i>t</i>) exatamente no ponto do cursor.' },
+      { id: '0.2', t: 'Os parâmetros', alvo: '#sim-ctl tr[data-p="K"]', libera: { p: ['K'] },
+        fala: 'A <b>Tabela 1</b> controla a curva. Arraste o controle de <i>K</i> ou digite um novo valor.',
+        check: c => c.ev === 'param',
+        dicas: ['O controle deslizante fica logo abaixo da linha de K.', 'Digite 1500 no campo de valor de K.', () => animateTo('K', 1500)],
+        ret: 'Cada mudança redesenha a curva, a equação (2) e a Tabela 2 de grandezas derivadas.' },
+      { id: '0.3', t: 'A geometria', alvo: '#sim-ctl tr[data-p="r"]', libera: { p: ['r'] }, tipo: 'hl', hl: 'r', hold: 1000,
+        fala: 'As linhas finas mostram o que cada parâmetro faz. Passe o cursor (ou o foco do teclado) sobre a linha de <i>r</i> na Tabela 1.',
+        dicas: ['Procure o símbolo r na primeira coluna da Tabela 1.', 'Clique no campo de valor de r: o foco também destaca.', () => { const el = inputFor('r'); if (el) el.focus(); }],
+        ret: 'Destacar <i>r</i> ilumina a tangente e a faixa de 10 % a 90 %: é aí que <i>r</i> age sobre a curva.' },
+    ] },
+  { id: 1, t: 'Verhulst', dur: 12, desc: 'Teto, centro, inclinação e largura na curva em S.', view: 'simular',
+    prep: () => simPrep({ model: 'ver', rep: 'orig', vmode: 'curva', ann: true, zoom: true, V: { ...INIT.V } }),
+    m: [
+      { id: '1.1', t: 'O teto', alvo: '#sim-ctl tr[data-p="K"]', badge: 'L1',
+        aposta: { q: 'A população para de crescer em algum valor. Se o ambiente suportar o dobro de indivíduos, esse teto…', o: ['dobra', 'fica igual', 'cresce só um pouco'], c: 0 },
+        fala: 'Leve <i>K</i> de 1.000 para <b>2.000</b> (ou mais) e observe a linha tracejada no alto.',
+        check: c => c.S.V.K >= 2000,
+        dicas: ['K é a capacidade de suporte, na primeira linha da Tabela 1.', 'Digite 2000 no campo de valor de K.', () => animateTo('K', 2000)],
+        reg: () => `Leitura 1 — Teto: a população tende a K = ${n2(S.V.K, 0)} indivíduos.`,
+        ret: 'O teto acompanha <i>K</i>: é a assíntota horizontal tracejada.' },
+      { id: '1.2', t: 'O centro', alvo: '#sim-fig', tipo: 'cursor', badge: 'L2', hold: 700,
+        fala: 'Encontre, com o cursor, o instante em que a população vale <b>metade do teto</b>.',
+        cx: { id: 'sim-fig', alvo: () => effParams('ver').t0, tol: 0.5 },
+        fb: { label: 'ou digite o instante lido (dias)', ans: () => effParams('ver').t0, tol: 0.5 },
+        dicas: ['Metade do teto é K/2. Procure onde o quadro de leitura mostra N ≈ K/2.', 'É o ponto preto marcado na curva, sobre a linha vertical t₀.', () => cursorTo('sim-fig', effParams('ver').t0)],
+        reg: () => `Leitura 2 — Centro: N = K/2 = ${n2(S.V.K / 2, 0)} em t₀ = ${n2(effParams('ver').t0)} dias.`,
+        ret: 'No centro a população é <i>K</i>/2 e a curva muda de concavidade: é o ponto de inflexão.' },
+      { id: '1.3', t: 'A inclinação', alvo: '#sim-ctl tr[data-p="r"], #sim-kv', badge: 'L3',
+        prep: () => { if (S.V.r !== 0.5) { S.V.r = 0.5; renderSim(); } },
+        aposta: { q: 'Se a taxa r dobrar, a inclinação da curva no centro…', o: ['dobra', 'quadruplica', 'fica igual'], c: 0 },
+        fala: 'Leve <i>r</i> de 0,5 para <b>1,0</b> e compare a inclinação máxima na Tabela 2.',
+        check: c => Math.abs(c.S.V.r - 1) <= 0.05,
+        dicas: ['r é a segunda linha da Tabela 1.', 'Digite 1 no campo de valor de r.', () => animateTo('r', 1)],
+        reg: () => `Leitura 3 — Inclinação central rK/4 = ${n2(S.V.r * S.V.K / 4, 1)} ind./dia (r = ${n2(S.V.r)} dia⁻¹).`,
+        ret: 'A inclinação central é <i>rK</i>/4: dobrou junto com <i>r</i>.' },
+      { id: '1.4', t: 'A largura', alvo: '#sim-fig', tipo: 'num', badge: 'L4',
+        fala: 'A faixa cinza vai de 10 % a 90 % do teto. <b>Quantos dias ela dura agora?</b> Use o cursor nas duas bordas.',
+        num: { label: 'Duração da faixa (dias)', ans: () => W1090 / S.V.r, tol: 0.3 },
+        dicas: ['Leia o tempo na borda esquerda e na borda direita da faixa e subtraia.', 'A largura vale 4,39/r. Com r = 1, quanto dá?', null],
+        reg: () => `Leitura 4 — Largura 10 %–90 %: 4,39/r = ${n2(W1090 / S.V.r)} dias.`,
+        ret: 'A largura é 4,39/<i>r</i> = 2 ln 9 / <i>r</i>: quanto maior <i>r</i>, mais curta a transição.' },
+      { id: '1.5', t: 'O deslocamento', alvo: '#sim-ctl tr[data-p="t0"]', libera: { p: ['t0'] },
+        fala: 'Mude <i>t</i>₀ em pelo menos <b>3 dias</b> e observe a forma da curva.',
+        check: c => Math.abs(c.S.V.t0 - c.base.V.t0) >= 3,
+        dicas: ['t₀ é a terceira linha da Tabela 1.', 'Some 4 ao valor atual de t₀.', () => animateTo('t0', Math.min(25, S.V.t0 + 4))],
+        reg: () => 'Mudar t₀ desloca a curva sem mudar sua forma.',
+        ret: 'A curva só mudou de lugar: teto, inclinação e largura continuam os mesmos.' },
+      { id: '1.6', t: 'A condição inicial', alvo: '#sim-vmode', libera: { vm: true, p: ['N0'] },
+        prep: () => { if (S.vmode !== 'curva') { S.vmode = 'curva'; renderSim(); } },
+        fala: 'Troque para <b>Condição inicial</b> e depois altere <i>r</i>. Observe o <i>t</i>₀ calculado abaixo da tabela.',
+        check: c => c.S.vmode === 'ci' && Math.abs(c.S.V.r - c.base.V.r) > 0.04,
+        dicas: ['O seletor de parametrização fica acima da Tabela 1.', 'Clique em “Condição inicial (K, r, N₀)” e mude r para 0,5.', () => { click('#sim-vmode [data-vm="ci"]'); setTimeout(() => animateTo('r', 0.5), 300); }],
+        reg: () => `Com N₀ fixo, t₀ = ln[(K − N₀)/N₀]/r = ${n2(effParams('ver').t0)} dias depende de r.`,
+        ret: 'Com <i>N</i>₀ fixo, mudar <i>r</i> também muda <i>t</i>₀. Por isso o laboratório separa os dois modos.' },
+    ],
+    desafio: 'D1' },
+  { id: 2, t: 'TRI', dur: 12, desc: 'Dificuldade, discriminação e acerto ao acaso.', view: 'simular',
+    prep: () => simPrep({ model: 'ver', rep: 'orig', vmode: 'curva', ann: true, I2: { a: 1.2, b: 0 }, I3: { a: 1.2, b: 0, c: 0 } }),
+    m: [
+      { id: '2.1', t: 'O novo eixo', alvo: '#sim-model', libera: { m: ['i2'] },
+        fala: 'Na TRI o eixo horizontal é a proficiência <i>θ</i>, uma escala latente sem unidade física. Selecione <b>TRI 2PL</b>.',
+        check: c => c.S.model === 'i2',
+        dicas: ['Os modelos ficam na barra acima da figura.', 'Clique no botão “TRI 2PL”.', () => click('#sim-model button[data-v="i2"]')],
+        reg: () => 'θ é uma escala latente; P(θ) é a probabilidade de acerto do item.',
+        ret: 'A curva agora mostra a probabilidade de acerto em função da proficiência.' },
+      { id: '2.2', t: 'A dificuldade', alvo: '#sim-ctl tr[data-p="b"]', libera: { p: ['b'] }, badge: 'L2',
+        fala: 'Torne o item <b>mais difícil</b>: aumente <i>b</i> em pelo menos 1. Para onde vai a curva?',
+        check: c => c.S.model === 'i2' && c.S.I2.b - c.base.I2.b >= 1,
+        dicas: ['b é a dificuldade, na Tabela 1.', 'Digite 1 no campo de valor de b.', () => animateTo('b', Math.min(3, S.I2.b + 1.2))],
+        reg: () => `Leitura 2 — Centro em θ = b = ${n2(S.I2.b)}; ali P = 1/2.`,
+        ret: 'A curva foi para a direita: é preciso mais proficiência para chegar a <i>P</i> = 1/2, que fica em <i>θ</i> = <i>b</i>.' },
+      { id: '2.3', t: 'Dois itens', alvo: '#sim-pin, #sim-ctl tr[data-p="a"]', libera: { p: ['a'] }, badge: 'L3',
+        fala: 'Clique em <b>Fixar curva de referência</b> e depois <b>aumente <i>a</i></b> para criar um item que separe melhor os alunos.',
+        check: c => c.S.ref && c.S.ref.m === 'i2' && c.S.I2.a > c.S.ref.P.a + 0.2,
+        dicas: ['Primeiro o botão “Fixar curva de referência”, depois a linha a da Tabela 1.', 'Fixe a referência e digite 2,5 em a.', () => { click('#sim-pin'); setTimeout(() => animateTo('a', 2.5), 200); }],
+        reg: () => `Leituras 3 e 4 — com a = ${n2(S.I2.a)}: inclinação a/4 = ${n2(S.I2.a / 4, 3)}; largura 4,39/a = ${n2(W1090 / S.I2.a)}.`,
+        ret: 'O novo item é mais íngreme: a inclinação central <i>a</i>/4 aumentou e a faixa de 10 % a 90 % (4,39/<i>a</i>) estreitou.' },
+      { id: '2.4', t: 'O chute', alvo: '#sim-model, #sim-ctl tr[data-p="c"]', libera: { m: ['i3'], p: ['c'] }, badge: 'L1',
+        prep: () => { S.I3 = { a: S.I2.a, b: S.I2.b, c: 0 }; },
+        aposta: { q: 'No 3PL há acerto ao acaso (c). Em θ = b, a probabilidade de acerto…', o: ['continua 1/2', 'fica acima de 1/2', 'fica abaixo de 1/2'], c: 1 },
+        fala: 'Selecione <b>TRI 3PL</b> e leve <i>c</i> a <b>0,2</b>.',
+        check: c => c.S.model === 'i3' && Math.abs(c.S.I3.c - 0.2) <= 0.005,
+        dicas: ['Primeiro o botão “TRI 3PL”, depois a linha c da Tabela 1.', 'Selecione 3PL e digite 0,2 em c.', () => { click('#sim-model button[data-v="i3"]'); setTimeout(() => animateTo('c', 0.2), 200); }],
+        reg: () => `Leitura 1 — Piso c = ${n2(S.I3.c)}; em θ = b, P = (1 + c)/2 = ${n2((1 + S.I3.c) / 2, 3)}.`,
+        ret: 'O piso subiu para <i>c</i>, e em <i>θ</i> = <i>b</i> a probabilidade vale (1 + <i>c</i>)/2 = 0,6: <i>b</i> continua sendo o ponto de inflexão, mas não o de 50 %.' },
+      { id: '2.5', t: 'Normalizar', alvo: '#sim-rep', libera: { r: ['norm'] },
+        fala: 'Troque para a representação <b>Normalizada</b>. O que acontece com o centro?',
+        check: c => c.S.rep === 'norm',
+        dicas: ['As representações ficam na barra acima da figura.', 'Clique em “Normalizada”.', () => click('#sim-rep button[data-v="norm"]')],
+        reg: () => 'q = (P − c)/(1 − c) volta a valer 1/2 em θ = b.',
+        ret: 'A curva normalizada <i>q</i> descarta o piso <i>c</i> e volta a ter centro 1/2: só ela coincide com a logística padrão.' },
+    ],
+    desafio: 'D2' },
+  { id: 3, t: 'Fermi–Dirac', dur: 10, desc: 'Ocupação de estados, potencial químico e temperatura.', view: 'simular',
+    prep: () => simPrep({ model: 'i2', rep: 'orig', vmode: 'curva', ann: true, zoom: true, F: { mu: 0.5, T: 300 } }),
+    m: [
+      { id: '3.1', t: 'A curva desce', alvo: '#sim-model', libera: { m: ['fd'], p: ['mu', 'T'] }, badge: 'L1',
+        fala: 'Selecione <b>Fermi–Dirac</b>. Agora a curva é decrescente: estados de energia baixa tendem a estar ocupados.',
+        check: c => c.S.model === 'fd',
+        dicas: ['Os modelos ficam na barra acima da figura.', 'Clique em “Fermi–Dirac”.', () => click('#sim-model button[data-v="fd"]')],
+        reg: () => 'Leitura 1 — Teto 1 e piso 0: ocupação média de um único estado quântico.',
+        ret: 'A ocupação vai de 1 (estados de energia baixa) a 0 (energia alta).' },
+      { id: '3.2', t: 'O potencial químico', alvo: '#sim-fig', tipo: 'cursor', badge: 'L2', hold: 700,
+        fala: 'Encontre com o cursor a energia em que a ocupação vale <b>1/2</b>.',
+        cx: { id: 'sim-fig', alvo: () => S.F.mu, tol: 0.005 },
+        fb: { label: 'ou digite a energia lida (eV)', ans: () => S.F.mu, tol: 0.005 },
+        dicas: ['Procure onde o quadro de leitura mostra f ≈ 0,5.', 'É o ponto marcado sobre a linha vertical μ.', () => cursorTo('sim-fig', S.F.mu)],
+        reg: () => `Leitura 2 — Centro em E = μ = ${n2(S.F.mu, 3)} eV, onde f = 1/2.`,
+        ret: 'O centro da distribuição é o potencial químico <i>μ</i>, qualquer que seja a temperatura.' },
+      { id: '3.3', t: 'Aquecer', alvo: '#sim-ctl tr[data-p="T"]', badge: 'L3',
+        aposta: { q: 'Aquecer o sistema deixa a transição de ocupado para vazio…', o: ['mais larga', 'mais estreita', 'igual'], c: 0 },
+        fala: 'Leve <i>T</i> de 300 K para <b>900 K</b> (ou mais).',
+        check: c => c.S.F.T >= 900,
+        dicas: ['T é a temperatura absoluta, na Tabela 1.', 'Digite 900 no campo de T.', () => animateTo('T', 900)],
+        reg: () => `Leituras 3 e 4 — com T = ${n2(S.F.T, 0)} K: inclinação −1/(4kBT) = ${n2(-1 / (4 * C.KB_EV * S.F.T), 2)} eV⁻¹; largura 4,39 kBT = ${n2(W1090 * C.KB_EV * S.F.T * 1000, 1)} meV.`,
+        ret: 'A transição alargou: sua largura é 4,39 <i>k</i><sub>B</sub><i>T</i> e a inclinação central, −1/(4<i>k</i><sub>B</sub><i>T</i>), ficou menor em módulo.' },
+      { id: '3.4', t: 'Os dois lados', alvo: '#sim-fig, #sim-ctl tr[data-p="T"]', tipo: 'choice',
+        fala: 'Experimente: deixe o cursor num ponto <b>abaixo de μ</b> e mude <i>T</i>. Responda quando quiser.',
+        choice: { q: 'Com μ fixo, ao aumentar T, a ocupação num ponto abaixo de μ…', o: [['diminui', true, 'Correto. ∂f/∂T = (E − μ)/(k<sub>B</sub>T²)·f(1 − f) é negativo para E &lt; μ e positivo para E &gt; μ: o efeito troca de sinal ao cruzar μ.'], ['aumenta', false, 'Isso acontece acima de μ. Abaixo de μ o sinal de E − μ é negativo, e a ocupação diminui.'], ['não muda', false, 'Só em E = μ a ocupação fica fixa em 1/2. Nos outros pontos ela muda com T.']] },
+        dicas: ['Clique na figura, use ← para ir à esquerda de μ e então mude T.', 'Compare f antes e depois de aumentar T, à esquerda do centro.', null],
+        reg: () => 'O efeito de T troca de sinal ao cruzar μ: abaixo, f diminui; acima, aumenta.',
+        ret: '' },
+      { id: '3.5', t: 'Esfriar', alvo: '#sim-ctl tr[data-p="T"]',
+        fala: 'Leve <i>T</i> ao mínimo (<b>10 K</b>). Que forma a curva toma?',
+        check: c => c.S.F.T <= 20,
+        dicas: ['Arraste o controle de T totalmente para a esquerda.', 'Digite 10 no campo de T.', () => animateTo('T', 10)],
+        reg: () => 'Limite T → 0⁺: a ocupação vira um degrau em E = μ.',
+        ret: 'Perto do zero absoluto a ocupação vira um degrau: todos os estados abaixo de <i>μ</i> ocupados e os de cima vazios.' },
+    ],
+    desafio: 'D3' },
+  { id: 4, t: 'Representações', dur: 8, desc: 'Logit, retas paralelas e o pico da derivada.', view: 'simular',
+    prep: () => simPrep({ model: 'i2', rep: 'orig', vmode: 'curva', ann: true, I2: { a: 1.5, b: 0.5 }, R: { b: 0 } }),
+    m: [
+      { id: '4.1', t: 'Endireitar a curva', alvo: '#sim-rep', libera: { r: ['logit'] },
+        fala: 'Troque para a representação <b>Logit</b>. O que aconteceu com a curva em S?',
+        check: c => c.S.rep === 'logit',
+        dicas: ['As representações ficam na barra acima da figura.', 'Clique em “Logit”.', () => click('#sim-rep button[data-v="logit"]')],
+        reg: () => 'No logit, ln[P/(1 − P)], a curva em S vira uma reta.',
+        ret: 'O logit desfaz a forma em S: a curva virou uma reta.' },
+      { id: '4.2', t: 'A inclinação da reta', alvo: '#sim-fig', tipo: 'num', badge: 'L5',
+        fala: 'Use o cursor em dois pontos da reta e calcule a <b>inclinação</b>: Δ(logit)/Δθ.',
+        num: { label: 'Inclinação da reta', ans: () => S.I2.a, rel: 0.05 },
+        dicas: ['Leia o logit em θ = −1 e em θ = 1 e divida a diferença por 2.', 'A inclinação do logit é exatamente o parâmetro de taxa do modelo.', null],
+        reg: () => `Leitura 5 — Inclinação do logit = a = ${n2(S.I2.a)}.`,
+        ret: 'A inclinação da reta é a própria discriminação <i>a</i>. Em Verhulst seria <i>r</i>; em Fermi–Dirac, −1/(<i>k</i><sub>B</sub><i>T</i>).' },
+      { id: '4.3', t: 'Retas paralelas', alvo: '#sim-model, #sim-pin, #sim-ctl tr[data-p="b"]', libera: { m: ['rasch'] },
+        fala: 'Selecione <b>Rasch/1PL</b>, mantenha o Logit, clique em <b>Fixar curva de referência</b> e mude <i>b</i>. As retas se cruzam?',
+        check: c => c.S.model === 'rasch' && c.S.rep === 'logit' && c.S.ref && c.S.ref.m === 'rasch' && Math.abs(c.S.R.b - c.S.ref.P.b) >= 0.5,
+        dicas: ['Ordem: Rasch/1PL → Fixar curva de referência → mudar b.', 'Depois de fixar, digite 1,5 em b.', () => { click('#sim-model button[data-v="rasch"]'); setTimeout(() => { click('#sim-pin'); setTimeout(() => animateTo('b', 1.5), 200); }, 200); }],
+        reg: () => 'No Rasch as retas logit são paralelas: todos os itens têm a mesma inclinação.',
+        ret: 'As retas não se cruzam: no Rasch a inclinação é comum a todos os itens, e só a posição muda.' },
+      { id: '4.4', t: 'O pico', alvo: '#sim-rep, #sim-fig', libera: { r: ['der'] }, tipo: 'cursor', hold: 700,
+        fala: 'Troque para <b>Derivada</b> e posicione o cursor no <b>pico</b>.',
+        cx: { id: 'sim-fig', alvo: () => effParams(S.model).b ?? 0, tol: 0.16, pre: c => c.S.rep === 'der' },
+        fb: { label: 'ou digite o θ do pico', ans: () => effParams(S.model).b ?? 0, tol: 0.16, pre: c => c.S.rep === 'der' },
+        dicas: ['Primeiro clique em “Derivada”.', 'O pico fica sobre a linha vertical b.', () => { click('#sim-rep button[data-v="der"]'); setTimeout(() => cursorTo('sim-fig', effParams(S.model).b), 200); }],
+        reg: () => 'O pico da derivada fica no centro e vale a inclinação central (Leitura 3).',
+        ret: 'O máximo da derivada está no ponto de inflexão, e sua altura é a inclinação central.' },
+    ],
+    desafio: 'D4' },
+  { id: 5, t: 'Uma mesma curva?', dur: 10, desc: 'Comparação, sincronização e os limites da analogia.', view: 'comparar',
+    prep: () => { Object.assign(S, { target: null, mystery: null, marks: null, noAnn: false }); document.body.classList.remove('tut-noparams'); syncReset(); cmpMode = '2'; goView('comparar'); },
+    m: [
+      { id: '5.1', t: 'Três em uma', alvo: '#c2', ver: '#c2', libera: { cmp: ['2'] }, tipo: 'choice',
+        fala: 'No modo II, os pontos dos três modelos caem sobre a mesma curva <i>L</i>(<i>z</i>).',
+        choice: { q: 'Por que os três modelos caem sobre a mesma curva?', o: [['Porque os três fenômenos têm o mesmo mecanismo', false, 'Não. Crescimento populacional, resposta a itens e ocupação quântica têm origens diferentes (Tabela 3).'], ['Porque normalizamos a grandeza vertical e trocamos a variável horizontal pelo argumento adimensional z', true, 'Correto. A coincidência é uma igualdade matemática construída por normalização e mudança de variável.'], ['Por coincidência dos valores dos parâmetros', false, 'Não é coincidência: com quaisquer parâmetros válidos os pontos caem sobre L(z). Mude-os no Simular e confira.']] },
+        dicas: ['Releia a legenda da Figura 3.', 'O eixo horizontal não é tempo, nem proficiência, nem energia: é z.', null],
+        reg: () => 'A coincidência vem da normalização e da troca de variável, não do mecanismo.', ret: '' },
+      { id: '5.2', t: 'Sincronizar', alvo: '#c3-ctl tr[data-p="a"], #c3-kv', ver: '#c3-a, #c3-b', libera: { cmp: ['3'], p: ['a'] },
+        prep: () => { syncReset(); cmpMode = '3'; renderCmp(); },
+        fala: 'No modo III, <b>aumente <i>a</i></b> na Tabela 5 e observe a temperatura vinculada na Tabela 6.',
+        check: c => c.SY.edit === 'tri' && c.SY.a >= c.base.SY.a + 0.3,
+        dicas: ['a é a primeira linha da Tabela 5.', 'Digite 2 em a.', () => animateTo('a', 2)],
+        reg: () => `T = λ/(a·kB): com a = ${n2(SY.a)}, T = ${n2(SY.lambda / (SY.a * C.KB_EV), 0)} K.`,
+        ret: 'Com <i>λ</i> fixo, item mais discriminativo corresponde a “temperatura” menor: transição mais abrupta.' },
+      { id: '5.3', t: 'A escala', alvo: '#c3-ctl2 tr[data-p="lambda"], #c3-kv', ver: '#c3-a, #c3-b', libera: { p: ['lambda'] }, badge: 'L6',
+        fala: 'Agora mude <b><i>λ</i></b> (em “Opções avançadas”, já aberto) sem mexer em <i>a</i>. O que acontece com a “temperatura”?',
+        check: c => Math.abs(c.SY.lambda - c.base.SY.lambda) > 0.002 && Math.abs(c.SY.a - c.base.SY.a) < 1e-9,
+        dicas: ['λ é a última linha da Tabela 5.', 'Digite 0,05 em λ.', () => animateTo('lambda', 0.05)],
+        reg: () => `Leitura 6 — T depende da escala λ escolhida (agora λ = ${n2(SY.lambda * 1000, 1)} meV): não é uma temperatura da aprendizagem.`,
+        ret: 'O mesmo item passou a corresponder a outra “temperatura”. O número depende de uma escolha de escala: ele não mede nada no processo de aprendizagem.' },
+      { id: '5.4', t: 'O complemento', alvo: '#c3-mode, #c3-a', ver: '#c3-a, #c3-b', libera: { sy: ['mode'] }, tipo: 'cursor', hold: 700,
+        fala: 'Selecione a correspondência <b>Complementar</b> e posicione o cursor em <b><i>θ</i> = 1</b> na figura (a).',
+        cx: { id: 'c3-a', alvo: () => 1, tol: 0.1, pre: c => c.SY.mode === 'complementar' },
+        fb: { label: 'ou digite f(E(1)) lido no quadro', ans: () => 1 - C.irt.P(1, { a: SY.a, b: SY.b }), tol: 0.01, pre: c => c.SY.mode === 'complementar' },
+        dicas: ['O seletor “Correspondência” fica acima das figuras.', 'Clique em “Complementar” e leve o cursor a θ = 1.', () => { click('#c3-mode button[data-v="complementar"]'); setTimeout(() => cursorTo('c3-a', 1), 250); }],
+        reg: () => 'Na correspondência complementar, f(E(θ)) = 1 − P(θ).',
+        ret: 'Os triângulos agora mostram 1 − <i>P</i>: a ocupação transformada é a probabilidade de erro modelada — o que, de novo, é uma igualdade formal.' },
+    ],
+    desafio: 'DF' },
+];
+
+// ------------------------------------------------------------ desafios
+const STMTS = [
+  ['As três curvas podem ser escritas como Y = A + B·L[s(x − x₀)].', 0, 'É a forma geral da Etapa 3: uma igualdade matemática.'],
+  ['Em Fermi–Dirac, cada estado quântico comporta no máximo um férmion, o que limita a ocupação a 1.', 1, 'É o princípio de exclusão de Pauli: um fato físico do modelo.'],
+  ['Os três fenômenos funcionam por “vagas livres” que vão sendo preenchidas.', 2, 'Só Fermi–Dirac tem base física para isso. Em Verhulst o termo (1 − N/K) é hipótese de recursos; na TRI não há vagas.'],
+  ['Com a transformação E = E₀ − λθ, μ = E₀ − λb e T = λ/(a·kB), f(E(θ)) = P(θ) para todo θ.', 0, 'É a correspondência direta: uma identidade entre funções compostas.'],
+  ['A discriminação de um item mede a temperatura da aprendizagem.', 2, 'O T vinculado depende de λ, uma escolha de escala. Não mede nada na aprendizagem.'],
+  ['Com μ fixo, aumentar T alarga a transição da ocupação em torno de μ.', 1, 'É uma propriedade física da distribuição: largura 4,39 kBT.'],
+  ['O tempo de crescimento de uma população é uma medida de proficiência.', 2, 'A igualdade n(t(θ)) = P(θ) é formal; tempo e proficiência são grandezas diferentes.'],
+  ['ln[n/(1 − n)] cresce linearmente com t, com inclinação r.', 0, 'É a linearização logit da solução de Verhulst.'],
+];
+const GROUPS = ['Vale matematicamente', 'Vale fisicamente', 'Não se sustenta'];
+const CHALLENGES = {
+  D1: { t: 'Desafio 1 — Ajuste a curva',
+    start() { const P = { K: rnd(600, 4000, 50), r: rnd(0.3, 1.5, 0.05), t0: rnd(4, 18, 0.5) }; simPrep({ model: 'ver', rep: 'orig', vmode: 'curva', ann: true, V: { ...INIT.V }, target: { m: 'ver', P } }); },
+    err() { const P = S.target.P, U = effParams('ver'); let s = 0; for (let i = 0; i <= 100; i++) { const t = 0.3 * i; s += ((C.verhulst.N(t, U) - C.verhulst.N(t, P)) / P.K) ** 2; } return Math.sqrt(s / 101); },
+    stars(e) { return e < 0.02 ? 3 : e < 0.05 ? 2 : e < 0.10 ? 1 : 0; },
+    html() { const e = this.err(), st = this.stars(e); return `<p>Ajuste <i>K</i>, <i>r</i> e <i>t</i>₀ até a sua curva cobrir a <b>curva-alvo pontilhada</b>. Leia o teto, o centro e a largura do alvo — sem dicas.</p><p class="td-live">Erro médio: <b id="d1-err">${n2(e * 100, 1)} %</b> · <span id="d1-st" aria-label="${st} estrelas">${stars(st)}</span></p><div class="td-btns"><button class="btn pri" type="button" id="d-ok" ${st ? '' : 'disabled'}>Concluir desafio</button><button class="btn" type="button" id="d-new">Nova curva-alvo</button></div>`; },
+    bind(root) { root.querySelector('#d-ok').onclick = () => finishChallenge(this.stars(this.err()), `Desafio 1 — curva ajustada com erro de ${n2(this.err() * 100, 1)} % (alvo K = ${n2(S.target.P.K, 0)}, r = ${n2(S.target.P.r)}, t₀ = ${n2(S.target.P.t0)}).`); root.querySelector('#d-new').onclick = () => { this.start(); renderDock(); }; },
+    onEvent() { const e = this.err(), st = this.stars(e), el = document.getElementById('d1-err'); if (!el) return; el.textContent = n2(e * 100, 1) + ' %'; const s2 = document.getElementById('d1-st'); s2.textContent = stars(st); s2.setAttribute('aria-label', st + ' estrelas'); document.getElementById('d-ok').disabled = !st; } },
+  D2: { t: 'Desafio 2 — Quem é quem',
+    start() {
+      const bs = shuffle([-1.3, 0, 1.3]).map(b => +(b + rnd(-0.2, 0.2, 0.05)).toFixed(2)), as = shuffle([0.6, 1.2, 2.4]);
+      const hi = bs.indexOf(Math.max(...bs)), items = ['A', 'B', 'C'].map((nm, i) => ({ name: nm, dash: ['', '9 5', '2.5 3.5'][i], P: { a: as[i], b: bs[i], c: i === hi ? 0.25 : 0 } }));
+      this.items = items; this.res = null;
+      simPrep({ model: 'i3', rep: 'orig', vmode: 'curva', mystery: items }); document.body.classList.add('tut-noparams');
+    },
+    key() { const it = this.items; return { easy: it.reduce((m, x) => x.P.b < m.P.b ? x : m).name, disc: it.reduce((m, x) => x.P.a > m.P.a ? x : m).name, guess: it.find(x => x.P.c > 0).name }; },
+    html() {
+      const sel = (id, l) => `<label class="td-sel">${l} <select id="${id}"><option value="">—</option><option>A</option><option>B</option><option>C</option></select></label>`;
+      const res = this.res ? `<p class="td-fb">${this.res}</p>` : '';
+      return `<p>Três itens sem rótulo de parâmetros. Identifique cada um <b>lendo as curvas</b>.</p><div class="td-row">${sel('d2-easy', 'Item mais fácil')}${sel('d2-disc', 'Mais discriminativo')}${sel('d2-guess', 'Com acerto ao acaso')}</div>${res}<div class="td-btns"><button class="btn pri" type="button" id="d-ok">Conferir</button><button class="btn" type="button" id="d-new">Novos itens</button></div>`;
+    },
+    bind(root) {
+      root.querySelector('#d-new').onclick = () => { this.start(); renderDock(); };
+      root.querySelector('#d-ok').onclick = () => {
+        const k = this.key(), g = { easy: root.querySelector('#d2-easy').value, disc: root.querySelector('#d2-disc').value, guess: root.querySelector('#d2-guess').value };
+        const nOk = ['easy', 'disc', 'guess'].filter(x => g[x] === k[x]).length;
+        const rev = this.items.map(it => `${it.name}: a = ${n2(it.P.a)}, b = ${n2(it.P.b)}, c = ${n2(it.P.c)}`).join(' · ');
+        if (nOk >= 2) { finishChallenge(nOk === 3 ? 3 : 2, `Desafio 2 — ${nOk}/3 identificações corretas (${rev}).`); return; }
+        this.res = `${nOk} de 3 corretas. Dica de leitura: dificuldade = onde a curva cruza o meio; discriminação = quão íngreme; acerto ao acaso = piso acima de zero. Tente com novos itens.`;
+        renderDock();
+      };
+    } },
+  D3: { t: 'Desafio 3 — Encomenda de ocupação',
+    start() { simPrep({ model: 'fd', rep: 'orig', vmode: 'curva', ann: true, zoom: false, F: { mu: 0.4, T: 600 }, marks: [{ x: 0.45, y: 0.9, c: 'ink', s: 'sq' }, { x: 0.55, y: 0.1, c: 'ink', s: 'sq' }] }); },
+    vals() { const f1 = C.fermi.f(0.45, S.F), f2 = C.fermi.f(0.55, S.F); return { f1, f2, e: Math.max(Math.abs(f1 - 0.9), Math.abs(f2 - 0.1)) }; },
+    stars(e) { return e <= 0.005 ? 3 : e <= 0.01 ? 2 : e <= 0.02 ? 1 : 0; },
+    html() { const v = this.vals(), st = this.stars(v.e); return `<p>Ajuste <i>μ</i> e <i>T</i> para que <b><i>f</i>(0,45 eV) = 0,90</b> e <b><i>f</i>(0,55 eV) = 0,10</b> (quadrados na figura), com tolerância de ±0,02.</p><p class="td-live">f(0,45) = <b id="d3-a">${n2(v.f1, 3)}</b> · f(0,55) = <b id="d3-b">${n2(v.f2, 3)}</b> · <span id="d3-st">${stars(st)}</span></p><div class="td-btns"><button class="btn pri" type="button" id="d-ok" ${st ? '' : 'disabled'}>Concluir desafio</button></div>`; },
+    bind(root) { root.querySelector('#d-ok').onclick = () => { const v = this.vals(); finishChallenge(this.stars(v.e), `Desafio 3 — μ = ${n2(S.F.mu, 3)} eV e T = ${n2(S.F.T, 0)} K dão f(0,45) = ${n2(v.f1, 3)} e f(0,55) = ${n2(v.f2, 3)}.`); }; },
+    onEvent() { const v = this.vals(), st = this.stars(v.e), a = document.getElementById('d3-a'); if (!a) return; a.textContent = n2(v.f1, 3); document.getElementById('d3-b').textContent = n2(v.f2, 3); document.getElementById('d3-st').textContent = stars(st); document.getElementById('d-ok').disabled = !st; } },
+  D4: { t: 'Desafio 4 — Parâmetro escondido',
+    start() { simPrep({ model: 'i2', rep: 'logit', vmode: 'curva', noAnn: true, I2: { a: rnd(0.6, 2.4, 0.05), b: rnd(-1.5, 1.5, 0.05) } }); document.body.classList.add('tut-noparams'); this.res = null; },
+    html() { return `<p>Os valores dos parâmetros estão escondidos. Use só a <b>reta logit</b> e o cursor para descobrir a discriminação e a dificuldade do item.</p><div class="td-row"><label class="td-sel">Discriminação <i>a</i> <input type="text" id="d4-a" inputmode="decimal" autocomplete="off"></label><label class="td-sel">Dificuldade <i>b</i> <input type="text" id="d4-b" inputmode="decimal" autocomplete="off"></label></div>${this.res ? `<p class="td-fb">${this.res}</p>` : ''}<div class="td-btns"><button class="btn pri" type="button" id="d-ok">Conferir</button></div>`; },
+    bind(root) { root.querySelector('#d-ok').onclick = () => {
+      const a = +root.querySelector('#d4-a').value.replace(',', '.'), b = +root.querySelector('#d4-b').value.replace(',', '.'), A = S.I2.a, B = S.I2.b;
+      const ea = Math.abs(a - A) / A, eb = Math.abs(b - B), st = ea <= 0.05 && eb <= 0.1 ? 3 : ea <= 0.10 && eb <= 0.2 ? 2 : ea <= 0.20 && eb <= 0.4 ? 1 : 0;
+      if (st) { finishChallenge(st, `Desafio 4 — lidos a = ${n2(a)} e b = ${n2(b)}; verdadeiros a = ${n2(A)} e b = ${n2(B)}.`); return; }
+      this.res = 'Ainda longe. A inclinação da reta é a; o ponto em que a reta cruza logit = 0 é b. Tente de novo.'; renderDock(); }; } },
+  DF: { t: 'Desafio final — Até onde vai a analogia',
+    start() { this.ans = Array(STMTS.length).fill(null); this.checked = false; cmpMode = '3'; goView('comparar'); },
+    html() {
+      return `<p>Classifique cada afirmação. Depois escreva, se quiser, uma justificativa para o caderno.</p><ol class="td-stm">${STMTS.map(([t, k, why], i) => `<li><span>${t}</span><span class="td-g" role="group" aria-label="Classificação da afirmação ${i + 1}">${GROUPS.map((g, j) => `<button type="button" data-i="${i}" data-j="${j}" aria-pressed="${this.ans[i] === j}" class="${this.checked ? (j === k ? 'ok' : this.ans[i] === j ? 'no' : '') : ''}">${g}</button>`).join('')}</span>${this.checked ? `<small>${why}</small>` : ''}</li>`).join('')}</ol><label class="td-sel" style="display:block">Justificativa (opcional)<textarea id="df-j" style="min-height:60px"></textarea></label><div class="td-btns"><button class="btn pri" type="button" id="d-ok" ${this.ans.includes(null) ? 'disabled' : ''}>${this.checked ? 'Concluir' : 'Conferir'}</button></div>`;
+    },
+    bind(root) {
+      root.querySelectorAll('.td-g button').forEach(b => b.onclick = () => { if (this.checked) return; this.ans[+b.dataset.i] = +b.dataset.j; const keep = root.querySelector('#df-j').value; renderDock(); document.querySelector('#df-j').value = keep; });
+      root.querySelector('#d-ok').onclick = () => {
+        const nOk = this.ans.filter((a, i) => a === STMTS[i][1]).length;
+        if (!this.checked) { this.checked = true; this.nOk = nOk; const keep = root.querySelector('#df-j').value; renderDock(); document.querySelector('#df-j').value = keep; return; }
+        const j = document.querySelector('#df-j').value.trim();
+        finishChallenge(nOk >= 8 ? 3 : nOk >= 6 ? 2 : nOk >= 4 ? 1 : 0, `Desafio final — ${nOk}/8 afirmações classificadas corretamente.${j ? ' Justificativa: ' + j : ''}`, nOk < 4);
+      };
+    } },
+};
+const stars = n => '★'.repeat(n) + '☆'.repeat(3 - n);
+
+// ------------------------------------------------------------ desbloqueio progressivo
+function allowed() {
+  const A = { p: new Set(), m: new Set(), r: new Set(), cmp: new Set(), sy: new Set(), vm: false };
+  const add = l => { if (!l) return; (l.p || []).forEach(x => A.p.add(x)); (l.m || []).forEach(x => A.m.add(x)); (l.r || []).forEach(x => A.r.add(x)); (l.cmp || []).forEach(x => A.cmp.add(x)); (l.sy || []).forEach(x => A.sy.add(x)); if (l.vm) A.vm = true; };
+  for (const ph of PHASES) {
+    if (ph.id > TS.ph) break;
+    ph.m.forEach((m, i) => { if (ph.id < TS.ph || i <= TS.i || TS.st === 'desafio' || TS.st === 'fim') add(m.libera); });
+  }
+  if (TS.st === 'desafio') { if (TS.chId === 'D1') ['K', 'r', 't0'].forEach(x => A.p.add(x)); if (TS.chId === 'D3') ['mu', 'T'].forEach(x => A.p.add(x)); }
+  return A;
+}
+function lockEl(e, why) { e.classList.add('tut-locked'); e.inert = true; if (why) e.title = why; }
+window.__TUTLOCK = () => {
+  document.querySelectorAll('.tut-locked').forEach(e => { e.classList.remove('tut-locked'); e.inert = false; e.removeAttribute('title'); });
+  if (!TS.on) return;
+  const A = allowed(), why = 'Desbloqueia mais adiante no tutorial';
+  document.querySelectorAll('#sim-ctl tr[data-p], #c3-ctl tr[data-p], #c3-ctl2 tr[data-p]').forEach(tr => { if (!A.p.has(tr.dataset.p)) lockEl(tr, why); });
+  document.querySelectorAll('#sim-model button').forEach(b => { if (!A.m.has(b.dataset.v) && b.getAttribute('aria-pressed') !== 'true') lockEl(b, why); });
+  document.querySelectorAll('#sim-rep button').forEach(b => { if (!A.r.has(b.dataset.v) && b.getAttribute('aria-pressed') !== 'true') lockEl(b, why); });
+  if (!A.vm) document.querySelectorAll('#sim-vmode [data-vm]').forEach(b => { if (b.getAttribute('aria-pressed') !== 'true') lockEl(b, why); });
+  document.querySelectorAll('#cmp-mode button').forEach(b => { if (!A.cmp.has(b.dataset.v) && b.getAttribute('aria-pressed') !== 'true') lockEl(b, why); });
+  document.querySelectorAll('#c3-model button, #c3-edit button').forEach(b => { if (b.getAttribute('aria-pressed') !== 'true') lockEl(b, why); });
+  if (!A.sy.has('mode')) document.querySelectorAll('#c3-mode button').forEach(b => { if (b.getAttribute('aria-pressed') !== 'true') lockEl(b, why); });
+  const l3 = document.getElementById('c3-l300'); if (l3) lockEl(l3, why);
+  document.querySelectorAll('#sim-layers .lay-adv').forEach(e => lockEl(e, 'Disponível fora do tutorial'));
+};
+
+// ------------------------------------------------------------ motor
+const phase = () => PHASES[TS.ph], mission = () => phase().m[TS.i];
+function snapshot() { return structuredClone({ V: S.V, I2: S.I2, I3: S.I3, R: S.R, F: S.F, SY: { ...SY }, vmode: S.vmode, model: S.model, rep: S.rep, zoom: S.zoom, cmp: cmpMode }); }
+function restore(sn) { const { SY: sy, cmp, ...rest } = structuredClone(sn); Object.assign(S, rest); Object.assign(SY, sy); cmpMode = cmp; prevP = null; route(); }
+function ctx(ev) { return { S, SY, cmp: cmpMode, cur: TS.cur, hl: HILITE, base: TS.base, ev }; }
+function startPhase(k, resume) {
+  TS.on = true; TS.ph = k; TS.i = 0; TS.ch = null; TS.chId = null;
+  document.body.classList.add('tut-on'); $('#tut-dock').hidden = false;
+  phase().prep();
+  if (resume && resume.ph === k) { if (resume.snap) restore(resume.snap); TS.i = Math.min(resume.i, phase().m.length); }
+  if (TS.i >= phase().m.length) startChallenge(); else startMission();
+}
+function startMission() {
+  const m = mission(); clearTimers();
+  TS.data.resume = { ph: TS.ph, i: TS.i, snap: snapshot() }; tsave();
+  if (phase().view === 'simular' && location.hash.slice(1) !== 'simular') goView('simular');
+  if (phase().view === 'comparar' && location.hash.slice(1) !== 'comparar') goView('comparar');
+  m.prep?.();
+  TS.base = snapshot(); TS.hint = 0; TS.bet = null; TS.skipped = false; TS.cur = { id: null, x: null }; TS.choiceFb = null; TS.numFb = null;
+  TS.st = m.aposta ? 'aposta' : 'acao';
+  afterRender();
+  document.querySelectorAll(m.alvo).forEach(el => { const d = el.closest('details'); if (d) d.open = true; }); // alvo dentro de seção recolhida: abre
+  renderDock(); focusTarget(); armIdle();
+}
+function clearTimers() { clearTimeout(TS.idle); clearTimeout(TS.hold); TS.hold = null; }
+function armIdle() { clearTimeout(TS.idle); if (TS.st !== 'acao' || TS.hint > 0) return; TS.idle = setTimeout(() => { if (TS.on && TS.st === 'acao' && TS.hint === 0) { TS.hint = 1; renderDock(); } }, 25000); }
+function evaluate(ev) {
+  if (!TS.on || TS.st !== 'acao') return;
+  const m = mission(), c = ctx(ev), tipo = m.tipo || 'acao';
+  if (tipo === 'acao' && m.check(c)) return complete();
+  const holdOk = cond => { if (cond) { if (!TS.hold) TS.hold = setTimeout(() => { TS.hold = null; if (TS.st === 'acao' && test()) complete(); }, m.hold || 700); } else { clearTimeout(TS.hold); TS.hold = null; } };
+  const test = () => {
+    const cc = ctx(), cx = m.cx;
+    if (tipo === 'cursor') { if (cx.pre && !cx.pre(cc)) return false; if (cc.cur.id !== cx.id || cc.cur.x == null) return false; const a = cx.alvo(); return a == null || Math.abs(cc.cur.x - a) <= cx.tol; }
+    if (tipo === 'hl') return cc.hl === m.hl;
+    return false;
+  };
+  if (tipo === 'cursor' || tipo === 'hl') holdOk(test());
+}
+function complete(skipped) {
+  clearTimers();
+  const m = mission(); TS.skipped = !!skipped;
+  const txt = m.reg ? m.reg() : '';
+  if (txt) TS.data.notes.push({ ph: TS.ph, id: m.id, t: m.t, txt: skipped ? txt + ' (passo pulado)' : txt, bet: TS.bet, at: new Date().toISOString() });
+  TS.newBadge = null;
+  if (m.badge && !skipped && !TS.data.badges.includes(m.badge)) { TS.data.badges.push(m.badge); TS.newBadge = m.badge; }
+  tsave(); TS.st = 'retorno'; renderDock();
+  const b = document.querySelector('#td-next'); if (b) b.focus({ preventScroll: true });
+}
+function next() {
+  TS.i++;
+  if (TS.i < phase().m.length) startMission(); else if (phase().desafio) startChallenge(); else phaseDone(null);
+}
+function startChallenge() {
+  clearTimers(); TS.chId = phase().desafio; TS.ch = CHALLENGES[TS.chId];
+  TS.data.resume = { ph: TS.ph, i: phase().m.length }; tsave();
+  TS.ch.start(); TS.st = 'desafio'; afterRender(); renderDock(); paintMask();
+}
+function finishChallenge(st, txt, retry) {
+  if (retry) { TS.ch.start(); renderDock(); return; }
+  TS.data.notes.push({ ph: TS.ph, id: TS.chId, t: TS.ch.t, txt, at: new Date().toISOString() });
+  phaseDone(st);
+}
+function phaseDone(st) {
+  const k = TS.ph, prev = TS.data.done[k];
+  TS.data.done[k] = Math.max(prev ?? 0, st ?? 0); TS.data.resume = null; tsave();
+  document.body.classList.remove('tut-noparams'); Object.assign(S, { target: null, mystery: null, marks: null, noAnn: false });
+  TS.st = 'fim'; TS.lastStars = st; renderDock(); paintMask();
+}
+function exitTutorial(toMap = true) {
+  clearTimers(); TS.on = false; TS.st = 'idle'; TS.ch = null; TS.chId = null;
+  Object.assign(S, { target: null, mystery: null, marks: null, noAnn: false, ann: false }); // ao sair, volta ao padrão: geometria desligada
+  document.body.classList.remove('tut-on', 'tut-noparams'); $('#tut-dock').hidden = true; $('#tut-drawer').hidden = true; paintMask();
+  afterRender();
+  if (toMap) goView('aprender');
+}
+function hint() {
+  const m = mission(); if (TS.st !== 'acao' || !m.dicas) return;
+  TS.hint = Math.min(3, TS.hint + 1);
+  if (TS.hint === 3 && typeof m.dicas[2] === 'function') m.dicas[2]();
+  renderDock();
+}
+window.__TUTHOOK = (type, d) => {
+  if (!TS.on) return;
+  if (type === 'cursor') TS.cur = { id: d.id, x: d.x };
+  if (type === 'view' || type === 'cmp' || type === 'model' || type === 'rep' || type === 'sync' || type === 'vmode') requestAnimationFrame(paintMask);
+  if (TS.st === 'acao') { armIdle(); evaluate(type); }
+  if (TS.st === 'desafio' && TS.ch && TS.ch.onEvent) TS.ch.onEvent(type, d);
+};
+
+// ------------------------------------------------------------ interface: dock
+function renderDock() {
+  const dock = $('#tut-dock'); if (!TS.on) { dock.hidden = true; return; }
+  const ph = phase(), total = ph.m.length + (ph.desafio ? 1 : 0);
+  const pos = TS.st === 'desafio' || TS.st === 'fim' ? total : TS.i + (TS.st === 'retorno' ? 1 : 0);
+  const m = TS.st === 'desafio' || TS.st === 'fim' ? null : mission();
+  $('#td-where').innerHTML = `Fase ${ph.id} · ${ph.t} — ${m ? `Missão ${m.id} · ${m.t}` : TS.st === 'desafio' ? TS.ch.t : 'Fase concluída'}`;
+  $('#td-prog').style.width = (100 * pos / total) + '%';
+  $('#td-prog').parentElement.setAttribute('aria-valuenow', Math.round(100 * pos / total));
+  $('#td-notes').textContent = `Caderno (${TS.data.notes.length})`;
+  let msg = '', act = '';
+  if (TS.st === 'aposta') {
+    msg = `<span class="td-k">Aposta</span>${m.aposta.q}`;
+    act = `<div class="td-opts">${m.aposta.o.map((o, j) => `<button type="button" class="btn" data-bet="${j}">${o}</button>`).join('')}</div>`;
+  } else if (TS.st === 'acao') {
+    const tipo = m.tipo || 'acao';
+    msg = m.fala + (TS.bet ? `<span class="td-bet">Sua aposta: ${TS.bet.txt}</span>` : '');
+    if (tipo === 'num') act += `<div class="td-row"><label class="td-sel">${m.num.label} <input type="text" inputmode="decimal" autocomplete="off" id="td-num"></label><button class="btn pri" type="button" id="td-check">Conferir</button></div>${TS.numFb ? `<p class="td-fb">${TS.numFb}</p>` : ''}`;
+    if (tipo === 'choice') act += `<p><b>${m.choice.q}</b></p><div class="td-opts">${m.choice.o.map((o, j) => `<button type="button" class="btn" data-ch="${j}">${o[0]}</button>`).join('')}</div>${TS.choiceFb ? `<p class="td-fb">${TS.choiceFb}</p>` : ''}`;
+    if (m.fb) act += `<details class="td-alt"><summary>Sem mouse? Digite o valor</summary><div class="td-row"><label class="td-sel">${m.fb.label} <input type="text" inputmode="decimal" autocomplete="off" id="td-fbv"></label><button class="btn" type="button" id="td-fbok">Conferir</button></div>${TS.numFb ? `<p class="td-fb">${TS.numFb}</p>` : ''}</details>`;
+    if (TS.hint > 0 && m.dicas) { const h = m.dicas[Math.min(TS.hint, 2) - 1]; const lvl = Math.min(TS.hint, 3); act += `<p class="td-hint"><span class="td-k">Dica ${lvl}</span>${lvl === 3 ? (typeof m.dicas[2] === 'function' ? 'Veja: o tutor fez a ação por você.' : m.dicas[1]) : h}</p>`; }
+    act += `<div class="td-btns">${m.dicas ? `<button class="btn" type="button" id="td-hintb" aria-keyshortcuts="h">${TS.hint >= 3 ? 'Sem mais dicas' : 'Dica (H)'}</button>` : ''}<button class="btn" type="button" id="td-skip">Pular passo</button></div>`;
+  } else if (TS.st === 'retorno') {
+    const bet = TS.bet ? `<span class="td-bet">Sua aposta “${TS.bet.txt}” foi ${TS.bet.ok ? '<b>confirmada</b>' : '<b>não confirmada</b>'}.</span>` : '';
+    const note = TS.data.notes.length && TS.data.notes.at(-1).id === m.id ? `<span class="td-note">Anotado no caderno: ${TS.data.notes.at(-1).txt}</span>` : '';
+    const badge = TS.newBadge ? `<span class="td-badge" role="status">Insígnia conquistada: <b>${BADGES[TS.newBadge]}</b></span>` : '';
+    msg = (m.ret || (TS.choiceFb || '')) + bet + note + badge;
+    act = `<div class="td-btns"><button class="btn pri" type="button" id="td-next">Continuar (Enter)</button></div>`;
+  } else if (TS.st === 'desafio') {
+    msg = `<span class="td-k">Desafio sem ajuda</span><b>${TS.ch.t}</b>`;
+    act = TS.ch.html();
+  } else if (TS.st === 'fim') {
+    const nx = PHASES[TS.ph + 1];
+    msg = `<b>Fase ${ph.id} concluída.</b> ${TS.lastStars != null ? `Desafio: <span aria-label="${TS.lastStars} estrelas">${stars(TS.lastStars)}</span>. ` : ''}${nx ? `A Fase ${nx.id} — ${nx.t} foi desbloqueada.` : 'Você completou o tutorial: as seis leituras estão no caderno de campo.'}`;
+    act = `<div class="td-btns">${nx ? `<button class="btn pri" type="button" id="td-nextph">Ir para a Fase ${nx.id}</button>` : ''}<button class="btn" type="button" id="td-map">Voltar ao mapa</button></div>`;
+  }
+  $('#td-msg').innerHTML = msg; $('#td-act').innerHTML = act;
+  bindDock();
+  requestAnimationFrame(() => { document.documentElement.style.setProperty('--dock-h', dock.offsetHeight + 'px'); paintMask(); });
+}
+function bindDock() {
+  const A = $('#td-act'), m = (TS.st === 'aposta' || TS.st === 'acao' || TS.st === 'retorno') ? mission() : null;
+  A.querySelectorAll('[data-bet]').forEach(b => b.onclick = () => { const j = +b.dataset.bet; TS.bet = { txt: m.aposta.o[j], ok: j === m.aposta.c, j }; TS.st = 'acao'; renderDock(); focusTarget(); armIdle(); });
+  A.querySelectorAll('[data-ch]').forEach(b => b.onclick = () => { const o = m.choice.o[+b.dataset.ch]; TS.choiceFb = o[2]; if (o[1]) complete(); else { b.classList.add('no'); renderDock(); } });
+  const chk = (val, spec) => { const v = +String(val).replace(',', '.'); if (!Number.isFinite(v)) return 'Digite um número.'; if (spec.pre && !spec.pre(ctx())) return 'Faça primeiro a ação pedida acima.'; const a = spec.ans(); const ok = spec.rel ? Math.abs(v - a) <= spec.rel * Math.abs(a) : Math.abs(v - a) <= spec.tol; return ok ? true : `Ainda não: ${n2(v, 3)} está fora da tolerância. Confira a leitura e tente de novo.`; };
+  const cb = A.querySelector('#td-check'); if (cb) { const run = () => { const r = chk(A.querySelector('#td-num').value, m.num); if (r === true) complete(); else { TS.numFb = r; renderDock(); } }; cb.onclick = run; A.querySelector('#td-num').onkeydown = e => { if (e.key === 'Enter') run(); }; }
+  const fb = A.querySelector('#td-fbok'); if (fb) fb.onclick = () => { const r = chk(A.querySelector('#td-fbv').value, m.fb); if (r === true) complete(); else { TS.numFb = r; renderDock(); A.querySelector('.td-alt') && ($('#td-act .td-alt').open = true); } };
+  const hb = A.querySelector('#td-hintb'); if (hb) hb.onclick = hint;
+  const sk = A.querySelector('#td-skip'); if (sk) sk.onclick = () => complete(true);
+  const nb = A.querySelector('#td-next'); if (nb) nb.onclick = next;
+  const np = A.querySelector('#td-nextph'); if (np) np.onclick = () => startPhase(TS.ph + 1);
+  const mp = A.querySelector('#td-map'); if (mp) mp.onclick = () => exitTutorial(true);
+  if (TS.st === 'desafio') TS.ch.bind(A);
+}
+$('#td-exit').onclick = () => exitTutorial(true);
+$('#td-notes').onclick = () => { const d = $('#tut-drawer'); d.hidden = !d.hidden; if (!d.hidden) { renderNotes('#tut-drawer .tn-list'); d.querySelector('button').focus(); } };
+$('#tut-drawer .tn-close').onclick = () => { $('#tut-drawer').hidden = true; };
+document.addEventListener('keydown', e => {
+  if (!TS.on) return; const typing = /INPUT|TEXTAREA|SELECT/.test(e.target.tagName);
+  if (!typing && (e.key === 'h' || e.key === 'H')) { e.preventDefault(); hint(); }
+  if (!typing && e.key === 'Enter' && TS.st === 'retorno' && e.target.id !== 'td-next') { e.preventDefault(); next(); }
+});
+
+// ------------------------------------------------------------ foco guiado (máscara com recortes + anel)
+function rectsOf(sel) { if (!sel) return []; return [...document.querySelectorAll(sel)].map(e => e.getBoundingClientRect()).filter(r => r.width > 0 && r.height > 0); }
+function focusTarget() {
+  const m = mission(); if (!m) return;
+  const el = document.querySelector(m.alvo.split(',')[0]);
+  if (el) el.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' });
+}
+function paintMask() {
+  const svg = $('#tut-mask');
+  const show = TS.on && (TS.st === 'acao' || TS.st === 'aposta');
+  if (!show) { svg.style.display = 'none'; return; }
+  const m = mission(), W = innerWidth, H = innerHeight, pad = 6;
+  const tg = rectsOf(m.alvo), keep = rectsOf(m.ver || (phase().view === 'simular' ? '#sim-fig' : ''));
+  if (!tg.length) { svg.style.display = 'none'; return; }
+  const hole = r => `M${r.left - pad} ${r.top - pad}h${r.width + 2 * pad}v${r.height + 2 * pad}h${-(r.width + 2 * pad)}Z`;
+  svg.style.display = 'block'; svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = `<path fill-rule="evenodd" d="M0 0H${W}V${H}H0Z ${[...tg, ...keep].map(hole).join(' ')}" class="tm-dim"/>${tg.map(r => `<rect class="tm-ring" x="${r.left - pad}" y="${r.top - pad}" width="${r.width + 2 * pad}" height="${r.height + 2 * pad}" rx="8"/>`).join('')}`;
+}
+addEventListener('scroll', () => TS.on && paintMask(), { passive: true });
+addEventListener('resize', () => { if (TS.on) { document.documentElement.style.setProperty('--dock-h', $('#tut-dock').offsetHeight + 'px'); paintMask(); } });
+setInterval(() => { if (TS.on) paintMask(); }, 400); // acompanha reflows (tabelas que mudam de altura etc.)
+
+// ------------------------------------------------------------ mapa de fases, insígnias e caderno
+function unlocked(k) { return TS.data.unlockAll || k === 0 || TS.data.done[k - 1] != null; }
+function renderNotes(sel) {
+  const box = document.querySelector(sel); if (!box) return;
+  const N = TS.data.notes;
+  box.innerHTML = N.length ? `<ol class="tn">${N.map(n => `<li><span class="tn-id">${n.id}</span> <b>${esc(n.t)}.</b> ${esc(n.txt)}${n.bet ? ` <span class="mute small">(aposta: ${esc(n.bet.txt)} — ${n.bet.ok ? 'confirmada' : 'não confirmada'})</span>` : ''}</li>`).join('')}</ol>` : '<p class="mute">O caderno se preenche sozinho a cada missão concluída.</p>';
+}
+const notesText = () => `Caderno de campo — Laboratório Interdisciplinar de Modelos Logísticos\n\n${TS.data.notes.map(n => `${n.id} ${n.t}: ${n.txt}${n.bet ? ` (aposta: ${n.bet.txt} — ${n.bet.ok ? 'confirmada' : 'não confirmada'})` : ''}`).join('\n')}\n\nInsígnias: ${TS.data.badges.map(b => BADGES[b]).join(', ') || 'nenhuma'}\n\nAnotações livres:\n${TS.data.free || ''}`;
+function renderTutMap() {
+  const box = $('#tut-map'); if (!box) return;
+  const res = TS.data.resume;
+  box.innerHTML = PHASES.map(ph => {
+    const ok = unlocked(ph.id), d = TS.data.done[ph.id], cont = res && res.ph === ph.id;
+    const status = d != null ? (ph.desafio ? `<span aria-label="${d} estrelas">${stars(d)}</span>` : 'concluída') : cont ? `em andamento · missão ${ph.m[Math.min(res.i, ph.m.length - 1)].id}` : ok ? 'disponível' : 'bloqueada';
+    return `<article class="tm-card${ok ? '' : ' off'}${d != null ? ' done' : ''}"><p class="tm-n">Fase ${ph.id} · ${ph.dur} min</p><h3>${ph.t}</h3><p>${ph.desc}</p><p class="tm-s">${ph.m.length} missões${ph.desafio ? ' + desafio' : ''} · <b>${status}</b></p><button class="btn${ok ? ' pri' : ''}" type="button" data-ph="${ph.id}" ${ok ? '' : 'disabled'}>${!ok ? 'Bloqueada' : cont ? 'Continuar' : d != null ? 'Jogar de novo' : 'Iniciar'}</button></article>`;
+  }).join('');
+  box.onclick = e => { const b = e.target.closest('[data-ph]'); if (!b) return; const k = +b.dataset.ph, r = TS.data.resume; startPhase(k, r && r.ph === k ? r : null); };
+  $('#tut-badges').innerHTML = Object.keys(BADGES).map(k => `<span class="tb${TS.data.badges.includes(k) ? ' on' : ''}" title="${BADGE_DESC[k]}"><b>${BADGES[k]}</b><small>${BADGE_DESC[k]}</small></span>`).join('');
+  renderNotes('#tut-notes');
+  $('#tut-free').value = TS.data.free || '';
+}
+window.__TUTMAP = renderTutMap;
+$('#tut-free').oninput = e => { TS.data.free = e.target.value; tsave(); };
+$('#tut-copy').onclick = async () => { try { await navigator.clipboard.writeText(notesText()); $('#tut-status').textContent = 'Caderno copiado.'; } catch (e) { $('#tut-status').textContent = 'Não foi possível copiar automaticamente.'; } };
+$('#tut-reset').onclick = () => { if (!TS.resetArm) { TS.resetArm = true; $('#tut-reset').textContent = 'Confirmar: apagar progresso e caderno'; setTimeout(() => { TS.resetArm = false; $('#tut-reset').textContent = 'Reiniciar progresso'; }, 5000); return; } TS.resetArm = false; TS.data = { v: 1, done: {}, badges: [], notes: [], resume: null, free: '', unlockAll: false }; tsave(); $('#tut-reset').textContent = 'Reiniciar progresso'; renderTutMap(); };
+$('#tut-all').onclick = () => { TS.data.unlockAll = true; tsave(); renderTutMap(); };
+window.__TUTFIG = id => { const sp = FIGS.get(id), m = sp._m; return { L: m.L, R: m.R, T: m.T, W: m.W, x0: sp.x[0], x1: sp.x[1] }; };
+window.__TUT = { TS, PHASES, CHALLENGES, STMTS, startPhase, exitTutorial, allowed };
+
+
+// ------------------------------------------------------------ navegação
+const VIEWS = ['aprender', 'simular', 'comparar', 'planejar'];
+function route() {
+  const v = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'simular';
+  document.querySelectorAll('section[data-view]').forEach(s => s.classList.toggle('on', s.dataset.view === v));
+  document.querySelectorAll('nav a').forEach(a => { if (a.getAttribute('href') === '#' + v) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  if (v === 'simular') renderSim(); if (v === 'comparar') renderCmp(); if (v === 'aprender') { renderApr(); window.__TUTMAP && window.__TUTMAP(); } if (v === 'planejar') renderPln();
+  emit('view', { v });
+}
+window.addEventListener('hashchange', route);
+$('#ver').textContent = C.VERSION;
+route();
+window.__LAB = { S, SY, C, renderSim, renderCmp };
+}
+</script>
+</body>
+</html>
